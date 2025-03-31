@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "UwpTools (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "UwpTools (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
