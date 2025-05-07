@@ -31,36 +31,32 @@
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Text="解析结果" 
                        Style="{ThemeResource SubtitleTextBlockStyle}"
                        Margin="0,0,0,8"/>
 
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <TextBox x:Name="ResultTextBox"
+                     Grid.Row="1"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     Height="200"
+                     Margin="0,0,0,12"/>
 
-                <TextBox x:Name="ResultTextBox"
-                         IsReadOnly="True"
-                         TextWrapping="Wrap"
-                         AcceptsReturn="True"
-                         Height="200"/>
-
-                <StackPanel Grid.Column="1" 
-                            Margin="12,0,0,0">
-                    <Button x:Name="CopyButton"
-                            Content="复制"
-                            Click="CopyButton_Click"
-                            Margin="0,0,0,8"/>
-                    <Button x:Name="ClearButton"
-                            Content="清除"
-                            Click="ClearButton_Click"/>
-                </StackPanel>
-            </Grid>
+            <StackPanel Grid.Row="2" 
+                        Orientation="Horizontal"
+                        Spacing="8">
+                <Button x:Name="CopyButton"
+                        Content="复制"
+                        Click="CopyButton_Click"/>
+                <Button x:Name="ClearButton"
+                        Content="清除"
+                        Click="ClearButton_Click"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Page> 
