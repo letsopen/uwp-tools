@@ -117,14 +117,14 @@ namespace UwpTools
                     page = new ChineseNumberPage();
                     break;
                 case "HashToolsPage":
-                    // TODO: 实现HashToolsPage
-                    return;
+                    page = new HashToolsPage();
+                    break;
                 case "JwtToolsPage":
-                    // TODO: 实现JwtToolsPage
-                    return;
+                    page = new JwtToolsPage();
+                    break;
                 case "SubnetCalculatorPage":
-                    // TODO: 实现SubnetCalculatorPage
-                    return;
+                    page = new SubnetCalculatorPage();
+                    break;
             }
 
             if (page != null)
