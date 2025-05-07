@@ -15,33 +15,41 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <NavigationView x:Name="NavView"
-                        PaneDisplayMode="Left"
-                        IsSettingsVisible="False"
-                        IsBackButtonVisible="Collapsed"
-                        SelectionChanged="NavView_SelectionChanged">
-            <NavigationView.MenuItems>
-                <NavigationViewItem>
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Document"/>
-                    </NavigationViewItem.Icon>
-                    <NavigationViewItem.Content>
-                        <TextBlock Text="JSON工具"/>
-                    </NavigationViewItem.Content>
-                    <NavigationViewItem.Tag>json</NavigationViewItem.Tag>
-                </NavigationViewItem>
-                <NavigationViewItem>
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Pictures"/>
-                    </NavigationViewItem.Icon>
-                    <NavigationViewItem.Content>
-                        <TextBlock Text="Base64图片转换"/>
-                    </NavigationViewItem.Content>
-                    <NavigationViewItem.Tag>base64</NavigationViewItem.Tag>
-                </NavigationViewItem>
-            </NavigationView.MenuItems>
-        </NavigationView>
+        <CommandBar x:Name="TopCommandBar" 
+                    DefaultLabelPosition="Collapsed"
+                    IsOpen="False"
+                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <AppBarButton x:Name="BackButton" 
+                         Icon="Back" 
+                         Label="返回"
+                         Click="BackButton_Click"
+                         Visibility="Collapsed"/>
+        </CommandBar>
 
-        <Frame x:Name="ContentFrame" Grid.Row="1"/>
+        <Frame x:Name="ContentFrame" Grid.Row="1">
+            <ListView x:Name="ToolsListView" 
+                      SelectionMode="Single"
+                      SelectionChanged="ToolsListView_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="12,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <SymbolIcon Symbol="{Binding Icon}" 
+                                       Margin="0,0,12,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{Binding Title}" 
+                                         Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="{Binding Description}" 
+                                         Style="{ThemeResource BodyTextBlockStyle}"
+                                         TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Frame>
     </Grid>
 </Window>
