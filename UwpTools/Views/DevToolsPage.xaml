@@ -1,0 +1,89 @@
+<Page
+    x:Class="UwpTools.Views.DevToolsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UwpTools.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="开发辅助工具" 
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   Margin="0,0,0,20"/>
+
+        <ComboBox x:Name="ToolTypeComboBox"
+                  Grid.Row="1"
+                  PlaceholderText="选择工具类型"
+                  SelectionChanged="ToolTypeComboBox_SelectionChanged"
+                  Margin="0,0,0,20">
+            <ComboBoxItem Content="SQL格式化" Tag="sql"/>
+            <ComboBoxItem Content="XML格式化" Tag="xml"/>
+            <ComboBoxItem Content="Markdown预览" Tag="markdown"/>
+        </ComboBox>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="InputTextBox"
+                     Grid.Row="0"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="3"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     PlaceholderText="输入文本"
+                     TextChanged="InputTextBox_TextChanged"/>
+
+            <Button x:Name="FormatButton"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Content="格式化"
+                    Click="FormatButton_Click"
+                    Margin="10"/>
+
+            <WebView2 x:Name="PreviewWebView"
+                      Grid.Row="2"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="3"
+                      Visibility="Collapsed"/>
+
+            <TextBox x:Name="OutputTextBox"
+                     Grid.Row="2"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="3"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     IsReadOnly="True"
+                     PlaceholderText="输出结果"/>
+
+            <StackPanel Grid.Row="1"
+                        Grid.Column="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button x:Name="CopyButton"
+                        Content="复制"
+                        Click="CopyButton_Click"
+                        Margin="0,0,10,0"/>
+                <Button x:Name="ClearButton"
+                        Content="清除"
+                        Click="ClearButton_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page> 

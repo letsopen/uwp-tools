@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UwpTools.Views.SubnetMaskPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UwpTools.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="子网掩码计算工具" 
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   Margin="0,0,0,20"/>
+
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="IP地址："
+                       VerticalAlignment="Center"
+                       Margin="0,0,10,0"/>
+            <TextBox x:Name="IpAddressTextBox"
+                     PlaceholderText="例如：192.168.1.1"
+                     TextChanged="IpAddress_TextChanged"/>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="子网掩码："
+                       VerticalAlignment="Center"
+                       Margin="0,0,10,0"/>
+            <ComboBox x:Name="SubnetMaskComboBox"
+                      PlaceholderText="选择子网掩码"
+                      SelectionChanged="SubnetMask_SelectionChanged">
+                <ComboBoxItem Content="/24 (255.255.255.0)" Tag="24"/>
+                <ComboBoxItem Content="/16 (255.255.0.0)" Tag="16"/>
+                <ComboBoxItem Content="/8 (255.0.0.0)" Tag="8"/>
+                <ComboBoxItem Content="/20 (255.255.240.0)" Tag="20"/>
+                <ComboBoxItem Content="/28 (255.255.255.240)" Tag="28"/>
+            </ComboBox>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Spacing="10">
+            <TextBlock Text="计算结果："
+                       Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <TextBlock x:Name="NetworkAddressText"
+                       TextWrapping="Wrap"/>
+            <TextBlock x:Name="BroadcastAddressText"
+                       TextWrapping="Wrap"/>
+            <TextBlock x:Name="UsableIpRangeText"
+                       TextWrapping="Wrap"/>
+            <TextBlock x:Name="TotalHostsText"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+    </Grid>
+</Page> 

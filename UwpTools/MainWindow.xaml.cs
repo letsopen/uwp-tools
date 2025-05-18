@@ -40,51 +40,86 @@ namespace UwpTools
                 new ToolItem
                 {
                     Title = "JSON工具",
-                    Description = "JSON格式化、验证和转换工具",
-                    Icon = Symbol.Document,
-                    PageType = "JsonToolsPage"
+                    Description = "JSON格式化、验证和转换",
+                    Icon = "Json",
+                    PageType = typeof(JsonToolsPage)
                 },
                 new ToolItem
                 {
-                    Title = "Base64图片转换",
-                    Description = "图片与Base64编码互转工具",
-                    Icon = Symbol.Pictures,
-                    PageType = "Base64ImagePage"
+                    Title = "Base64图片",
+                    Description = "Base64图片转换",
+                    Icon = "Image",
+                    PageType = typeof(Base64ImagePage)
                 },
                 new ToolItem
                 {
-                    Title = "时间戳转换",
-                    Description = "时间戳与日期时间互转工具",
-                    Icon = Symbol.Clock,
-                    PageType = "TimestampPage"
+                    Title = "时间戳",
+                    Description = "时间戳转换工具",
+                    Icon = "Clock",
+                    PageType = typeof(TimestampPage)
                 },
                 new ToolItem
                 {
-                    Title = "中文数字转换",
-                    Description = "阿拉伯数字与中文大小写互转工具",
-                    Icon = Symbol.Character,
-                    PageType = "ChineseNumberPage"
+                    Title = "中文数字",
+                    Description = "中文数字转换工具",
+                    Icon = "Number",
+                    PageType = typeof(ChineseNumberPage)
                 },
                 new ToolItem
                 {
-                    Title = "HASH工具",
-                    Description = "支持MD5、CRC32、SHA1、SHA256、SHA512等哈希算法",
-                    Icon = Symbol.Keyboard,
-                    PageType = "HashToolsPage"
+                    Title = "哈希工具",
+                    Description = "多种哈希算法计算",
+                    Icon = "Hash",
+                    PageType = typeof(HashToolsPage)
                 },
                 new ToolItem
                 {
-                    Title = "JWT验证工具",
-                    Description = "JWT Token解析和验证工具",
-                    Icon = Symbol.Permissions,
-                    PageType = "JwtToolsPage"
+                    Title = "JWT工具",
+                    Description = "JWT验证和解码",
+                    Icon = "Jwt",
+                    PageType = typeof(JwtToolsPage)
                 },
                 new ToolItem
                 {
-                    Title = "子网掩码计算",
-                    Description = "IP地址和子网掩码计算工具",
-                    Icon = Symbol.Globe,
-                    PageType = "SubnetCalculatorPage"
+                    Title = "子网掩码",
+                    Description = "子网掩码计算工具",
+                    Icon = "Network",
+                    PageType = typeof(SubnetMaskPage)
+                },
+                new ToolItem
+                {
+                    Title = "编码转换",
+                    Description = "文本编码转换工具",
+                    Icon = "Text",
+                    PageType = typeof(EncodingToolsPage)
+                },
+                new ToolItem
+                {
+                    Title = "正则表达式",
+                    Description = "正则表达式测试工具",
+                    Icon = "Regex",
+                    PageType = typeof(RegexToolsPage)
+                },
+                new ToolItem
+                {
+                    Title = "颜色工具",
+                    Description = "颜色格式转换工具",
+                    Icon = "Color",
+                    PageType = typeof(ColorToolsPage)
+                },
+                new ToolItem
+                {
+                    Title = "开发辅助",
+                    Description = "SQL、XML、Markdown工具",
+                    Icon = "Code",
+                    PageType = typeof(DevToolsPage)
+                },
+                new ToolItem
+                {
+                    Title = "加密工具",
+                    Description = "多种加密算法工具",
+                    Icon = "Lock",
+                    PageType = typeof(EncryptionToolsPage)
                 }
             };
 
@@ -101,37 +136,15 @@ namespace UwpTools
 
         private void NavigateToTool(ToolItem tool)
         {
-            Page? page = null;
-            switch (tool.PageType)
+            if (tool.PageType != null)
             {
-                case "JsonToolsPage":
-                    page = new JsonToolsPage();
-                    break;
-                case "Base64ImagePage":
-                    page = new Base64ImagePage();
-                    break;
-                case "TimestampPage":
-                    page = new TimestampPage();
-                    break;
-                case "ChineseNumberPage":
-                    page = new ChineseNumberPage();
-                    break;
-                case "HashToolsPage":
-                    page = new HashToolsPage();
-                    break;
-                case "JwtToolsPage":
-                    page = new JwtToolsPage();
-                    break;
-                case "SubnetCalculatorPage":
-                    page = new SubnetCalculatorPage();
-                    break;
-            }
-
-            if (page != null)
-            {
-                ContentFrame.Content = page;
-                BackButton.Visibility = Visibility.Visible;
-                ToolsListView.Visibility = Visibility.Collapsed;
+                var page = Activator.CreateInstance(tool.PageType) as Page;
+                if (page != null)
+                {
+                    ContentFrame.Content = page;
+                    BackButton.Visibility = Visibility.Visible;
+                    ToolsListView.Visibility = Visibility.Collapsed;
+                }
             }
         }
 

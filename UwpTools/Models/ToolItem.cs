@@ -1,4 +1,5 @@
-using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace UwpTools.Models
 {
@@ -6,7 +7,9 @@ namespace UwpTools.Models
     {
         public required string Title { get; set; }
         public required string Description { get; set; }
-        public Symbol Icon { get; set; }
-        public required string PageType { get; set; }
+        public required string Icon { get; set; }
+        
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        public required Type PageType { get; set; }
     }
 } 
