@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UwpTools.Views.RegexToolsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -11,74 +12,52 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="正则表达式工具" 
-                   Style="{StaticResource TitleTextBlockStyle}"
+                   Style="{ThemeResource TitleLargeTextBlockStyle}"
                    Margin="0,0,0,20"/>
 
-        <Grid Grid.Row="1" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="PatternTextBox" 
-                     PlaceholderText="输入正则表达式模式"
-                     Margin="0,0,10,0"/>
-            <Button x:Name="TestButton"
-                    Content="测试"
-                    Click="TestButton_Click"/>
-        </Grid>
+        <StackPanel Grid.Row="1" Spacing="15" Margin="0,0,0,20">
+            <TextBox x:Name="PatternTextBox"
+                     Header="正则表达式"
+                     PlaceholderText="输入正则表达式"/>
+            
+            <TextBox x:Name="InputTextBox"
+                     Header="输入文本"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     Height="150"/>
+            
+            <ComboBox x:Name="OptionsComboBox"
+                      Header="匹配选项"
+                      PlaceholderText="选择匹配选项">
+                <ComboBoxItem Content="无" Tag="None"/>
+                <ComboBoxItem Content="忽略大小写" Tag="IgnoreCase"/>
+                <ComboBoxItem Content="多行模式" Tag="Multiline"/>
+                <ComboBoxItem Content="单行模式" Tag="Singleline"/>
+            </ComboBox>
+        </StackPanel>
 
-        <TextBox x:Name="InputTextBox"
-                 Grid.Row="2"
-                 PlaceholderText="输入要测试的文本"
+        <TextBox Grid.Row="2"
+                 x:Name="ResultTextBox"
+                 Header="匹配结果"
+                 IsReadOnly="True"
                  AcceptsReturn="True"
                  TextWrapping="Wrap"
-                 Height="100"
-                 Margin="0,0,0,10"/>
+                 Margin="0,0,0,20"/>
 
-        <Grid Grid.Row="3">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Text="匹配结果："
-                       Style="{StaticResource SubtitleTextBlockStyle}"
-                       Margin="0,0,0,10"/>
-
-            <ListView x:Name="MatchesListView"
-                      Grid.Row="1">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Margin="0,5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Index}"
-                                       Margin="0,0,10,0"/>
-                            <TextBlock Text="{Binding Value}"
-                                       Grid.Column="1"
-                                       TextWrapping="Wrap"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
-
-        <StackPanel Grid.Row="4" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right"
-                    Margin="0,10,0,0">
-            <Button x:Name="CopyButton"
-                    Content="复制结果"
-                    Click="CopyButton_Click"
-                    Margin="0,0,10,0"/>
+        <StackPanel Grid.Row="3" 
+                    Orientation="Horizontal"
+                    Spacing="10">
+            <Button x:Name="MatchButton"
+                    Content="匹配"
+                    Click="MatchButton_Click"/>
+            <Button x:Name="ReplaceButton"
+                    Content="替换"
+                    Click="ReplaceButton_Click"/>
             <Button x:Name="ClearButton"
                     Content="清除"
                     Click="ClearButton_Click"/>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UwpTools.Views.DevToolsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -15,75 +16,51 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="开发辅助工具" 
-                   Style="{StaticResource TitleTextBlockStyle}"
+                   Style="{ThemeResource TitleLargeTextBlockStyle}"
                    Margin="0,0,0,20"/>
 
-        <ComboBox x:Name="ToolTypeComboBox"
-                  Grid.Row="1"
-                  PlaceholderText="选择工具类型"
-                  SelectionChanged="ToolTypeComboBox_SelectionChanged"
-                  Margin="0,0,0,20">
-            <ComboBoxItem Content="SQL格式化" Tag="sql"/>
-            <ComboBoxItem Content="XML格式化" Tag="xml"/>
-            <ComboBoxItem Content="Markdown预览" Tag="markdown"/>
-        </ComboBox>
-
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
+        <StackPanel Grid.Row="1" Spacing="15" Margin="0,0,0,20">
             <TextBox x:Name="InputTextBox"
-                     Grid.Row="0"
-                     Grid.Column="0"
-                     Grid.ColumnSpan="3"
+                     Header="输入文本"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
-                     PlaceholderText="输入文本"
-                     TextChanged="InputTextBox_TextChanged"/>
+                     Height="150"/>
+            
+            <ComboBox x:Name="ToolTypeComboBox"
+                      Header="工具类型"
+                      PlaceholderText="选择工具类型">
+                <ComboBoxItem Content="Base64编码" Tag="Base64Encode"/>
+                <ComboBoxItem Content="Base64解码" Tag="Base64Decode"/>
+                <ComboBoxItem Content="URL编码" Tag="UrlEncode"/>
+                <ComboBoxItem Content="URL解码" Tag="UrlDecode"/>
+                <ComboBoxItem Content="HTML编码" Tag="HtmlEncode"/>
+                <ComboBoxItem Content="HTML解码" Tag="HtmlDecode"/>
+                <ComboBoxItem Content="MD5哈希" Tag="Md5Hash"/>
+                <ComboBoxItem Content="SHA1哈希" Tag="Sha1Hash"/>
+                <ComboBoxItem Content="SHA256哈希" Tag="Sha256Hash"/>
+            </ComboBox>
+        </StackPanel>
 
-            <Button x:Name="FormatButton"
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Content="格式化"
-                    Click="FormatButton_Click"
-                    Margin="10"/>
-
-            <WebView2 x:Name="PreviewWebView"
-                      Grid.Row="2"
-                      Grid.Column="0"
-                      Grid.ColumnSpan="3"
-                      Visibility="Collapsed"/>
-
+        <StackPanel Grid.Row="2" Spacing="15">
             <TextBox x:Name="OutputTextBox"
-                     Grid.Row="2"
-                     Grid.Column="0"
-                     Grid.ColumnSpan="3"
+                     Header="输出结果"
+                     IsReadOnly="True"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
-                     IsReadOnly="True"
-                     PlaceholderText="输出结果"/>
-
-            <StackPanel Grid.Row="1"
-                        Grid.Column="2"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right">
+                     Height="150"/>
+            
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="10">
+                <Button x:Name="ProcessButton"
+                        Content="处理"
+                        Click="ProcessButton_Click"/>
                 <Button x:Name="CopyButton"
-                        Content="复制"
-                        Click="CopyButton_Click"
-                        Margin="0,0,10,0"/>
+                        Content="复制结果"
+                        Click="CopyButton_Click"/>
                 <Button x:Name="ClearButton"
                         Content="清除"
                         Click="ClearButton_Click"/>
             </StackPanel>
-        </Grid>
+        </StackPanel>
     </Grid>
 </Page> 

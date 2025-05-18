@@ -14,73 +14,120 @@ namespace UwpTools.Views
             this.InitializeComponent();
         }
 
-        private void TestButton_Click(object sender, RoutedEventArgs e)
+        private void MatchButton_Click(object sender, RoutedEventArgs e)
         {
-            TestRegex();
-        }
-
-        private void TestRegex()
-        {
-            if (string.IsNullOrEmpty(PatternTextBox.Text) || string.IsNullOrEmpty(InputTextBox.Text))
+            if (string.IsNullOrEmpty(PatternTextBox.Text))
             {
+                ShowError("请输入正则表达式");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(InputTextBox.Text))
+            {
+                ShowError("请输入要匹配的文本");
                 return;
             }
 
             try
             {
-                var regex = new Regex(PatternTextBox.Text);
+                var options = GetRegexOptions();
+                var regex = new Regex(PatternTextBox.Text, options);
                 var matches = regex.Matches(InputTextBox.Text);
-                var results = new List<RegexMatchResult>();
 
-                for (int i = 0; i < matches.Count; i++)
+                if (matches.Count == 0)
                 {
-                    results.Add(new RegexMatchResult
-                    {
-                        Index = $"匹配 {i + 1}:",
-                        Value = matches[i].Value
-                    });
+                    ResultTextBox.Text = "未找到匹配项";
+                    return;
                 }
 
-                MatchesListView.ItemsSource = results;
+                var result = new System.Text.StringBuilder();
+                for (int i = 0; i < matches.Count; i++)
+                {
+                    var match = matches[i];
+                    result.AppendLine($"匹配 {i + 1}:");
+                    result.AppendLine($"位置: {match.Index}");
+                    result.AppendLine($"长度: {match.Length}");
+                    result.AppendLine($"值: {match.Value}");
+                    if (match.Groups.Count > 1)
+                    {
+                        result.AppendLine("捕获组:");
+                        for (int j = 1; j < match.Groups.Count; j++)
+                        {
+                            result.AppendLine($"  {j}: {match.Groups[j].Value}");
+                        }
+                    }
+                    result.AppendLine();
+                }
+
+                ResultTextBox.Text = result.ToString();
             }
             catch (Exception ex)
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "错误",
-                    Content = $"正则表达式错误：{ex.Message}",
-                    CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
-                };
-                _ = dialog.ShowAsync();
+                ShowError($"匹配失败: {ex.Message}");
             }
         }
 
-        private async void CopyButton_Click(object sender, RoutedEventArgs e)
+        private void ReplaceButton_Click(object sender, RoutedEventArgs e)
         {
-            if (MatchesListView.ItemsSource is List<RegexMatchResult> results && results.Count > 0)
+            if (string.IsNullOrEmpty(PatternTextBox.Text))
             {
-                var text = string.Join("\n", results.ConvertAll(r => $"{r.Index} {r.Value}"));
-                var dataPackage = new DataPackage();
-                dataPackage.SetText(text);
-                Clipboard.SetContent(dataPackage);
-
-                var dialog = new ContentDialog
-                {
-                    Title = "提示",
-                    Content = "已复制到剪贴板",
-                    CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
-                };
-                await dialog.ShowAsync();
+                ShowError("请输入正则表达式");
+                return;
             }
+
+            if (string.IsNullOrEmpty(InputTextBox.Text))
+            {
+                ShowError("请输入要替换的文本");
+                return;
+            }
+
+            try
+            {
+                var options = GetRegexOptions();
+                var regex = new Regex(PatternTextBox.Text, options);
+                var result = regex.Replace(InputTextBox.Text, "$&");
+                ResultTextBox.Text = result;
+            }
+            catch (Exception ex)
+            {
+                ShowError($"替换失败: {ex.Message}");
+            }
+        }
+
+        private RegexOptions GetRegexOptions()
+        {
+            var options = RegexOptions.None;
+            if (OptionsComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                options = selectedItem.Tag?.ToString() switch
+                {
+                    "IgnoreCase" => RegexOptions.IgnoreCase,
+                    "Multiline" => RegexOptions.Multiline,
+                    "Singleline" => RegexOptions.Singleline,
+                    _ => RegexOptions.None
+                };
+            }
+            return options;
         }
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             PatternTextBox.Text = string.Empty;
             InputTextBox.Text = string.Empty;
-            MatchesListView.ItemsSource = null;
+            ResultTextBox.Text = string.Empty;
+            OptionsComboBox.SelectedItem = null;
+        }
+
+        private void ShowError(string message)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "错误",
+                Content = message,
+                CloseButtonText = "确定",
+                XamlRoot = this.XamlRoot
+            };
+            _ = dialog.ShowAsync();
         }
     }
 

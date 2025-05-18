@@ -13,11 +13,12 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="编码转换工具" 
-                 Style="{ThemeResource TitleLargeTextBlockStyle}"
-                 Margin="0,0,0,20"/>
+                   Style="{ThemeResource TitleLargeTextBlockStyle}"
+                   Margin="0,0,0,20"/>
 
         <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
@@ -27,30 +28,19 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Spacing="10">
-                <ComboBox x:Name="SourceEncodingComboBox" 
-                         Header="源编码"
-                         SelectionChanged="Encoding_SelectionChanged">
-                    <ComboBoxItem Content="UTF-8" Tag="utf-8"/>
-                    <ComboBoxItem Content="UTF-16" Tag="utf-16"/>
-                    <ComboBoxItem Content="UTF-32" Tag="utf-32"/>
-                    <ComboBoxItem Content="GB2312" Tag="gb2312"/>
-                    <ComboBoxItem Content="GBK" Tag="gbk"/>
-                    <ComboBoxItem Content="GB18030" Tag="gb18030"/>
-                    <ComboBoxItem Content="ASCII" Tag="ascii"/>
-                    <ComboBoxItem Content="Unicode" Tag="unicode"/>
-                </ComboBox>
-
+                <ComboBox x:Name="SourceEncodingComboBox"
+                          Header="源编码"
+                          PlaceholderText="选择源编码"/>
                 <TextBox x:Name="SourceTextBox"
-                        Header="源文本"
-                        AcceptsReturn="True"
-                        TextWrapping="Wrap"
-                        Height="200"
-                        TextChanged="SourceText_TextChanged"/>
+                         Header="源文本"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Height="150"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" 
-                        VerticalAlignment="Center" 
-                        Margin="10,0">
+                        Margin="20,0"
+                        VerticalAlignment="Center">
                 <Button x:Name="ConvertButton"
                         Content="转换"
                         Click="ConvertButton_Click"/>
@@ -58,35 +48,25 @@
 
             <StackPanel Grid.Column="2" Spacing="10">
                 <ComboBox x:Name="TargetEncodingComboBox"
-                         Header="目标编码"
-                         SelectionChanged="Encoding_SelectionChanged">
-                    <ComboBoxItem Content="UTF-8" Tag="utf-8"/>
-                    <ComboBoxItem Content="UTF-16" Tag="utf-16"/>
-                    <ComboBoxItem Content="UTF-32" Tag="utf-32"/>
-                    <ComboBoxItem Content="GB2312" Tag="gb2312"/>
-                    <ComboBoxItem Content="GBK" Tag="gbk"/>
-                    <ComboBoxItem Content="GB18030" Tag="gb18030"/>
-                    <ComboBoxItem Content="ASCII" Tag="ascii"/>
-                    <ComboBoxItem Content="Unicode" Tag="unicode"/>
-                </ComboBox>
-
+                          Header="目标编码"
+                          PlaceholderText="选择目标编码"/>
                 <TextBox x:Name="TargetTextBox"
-                        Header="目标文本"
-                        AcceptsReturn="True"
-                        TextWrapping="Wrap"
-                        Height="200"
-                        IsReadOnly="True"/>
+                         Header="目标文本"
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         Height="150"/>
             </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="2" 
-                    Orientation="Horizontal" 
+        <StackPanel Grid.Row="3" 
+                    Orientation="Horizontal"
                     Spacing="10">
             <Button x:Name="CopyButton"
                     Content="复制结果"
                     Click="CopyButton_Click"/>
             <Button x:Name="ClearButton"
-                    Content="清空"
+                    Content="清除"
                     Click="ClearButton_Click"/>
         </StackPanel>
     </Grid>

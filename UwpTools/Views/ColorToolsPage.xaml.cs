@@ -5,183 +5,214 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.UI;
+using System.Text.RegularExpressions;
 
 namespace UwpTools.Views
 {
     public sealed partial class ColorToolsPage : Page
     {
-        private bool isUpdating = false;
-
         public ColorToolsPage()
         {
             this.InitializeComponent();
         }
 
-        private void HexTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void ColorInputTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (isUpdating) return;
-            isUpdating = true;
+            if (string.IsNullOrEmpty(ColorInputTextBox.Text))
+            {
+                ClearResults();
+                return;
+            }
 
             try
             {
-                string hex = HexTextBox.Text.TrimStart('#');
-                if (hex.Length == 6)
+                var format = (ColorFormatComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+                if (string.IsNullOrEmpty(format))
                 {
-                    byte r = Convert.ToByte(hex.Substring(0, 2), 16);
-                    byte g = Convert.ToByte(hex.Substring(2, 2), 16);
-                    byte b = Convert.ToByte(hex.Substring(4, 2), 16);
+                    return;
+                }
 
-                    RedTextBox.Text = r.ToString();
-                    GreenTextBox.Text = g.ToString();
-                    BlueTextBox.Text = b.ToString();
-
-                    UpdateHslFromRgb(r, g, b);
-                    UpdateColorPreview(r, g, b);
+                switch (format)
+                {
+                    case "HEX":
+                        ProcessHexColor(ColorInputTextBox.Text);
+                        break;
+                    case "RGB":
+                        ProcessRgbColor(ColorInputTextBox.Text);
+                        break;
+                    case "HSL":
+                        ProcessHslColor(ColorInputTextBox.Text);
+                        break;
                 }
             }
-            catch { }
-
-            isUpdating = false;
-        }
-
-        private void RgbTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (isUpdating) return;
-            isUpdating = true;
-
-            try
+            catch (Exception)
             {
-                if (byte.TryParse(RedTextBox.Text, out byte r) &&
-                    byte.TryParse(GreenTextBox.Text, out byte g) &&
-                    byte.TryParse(BlueTextBox.Text, out byte b))
-                {
-                    HexTextBox.Text = $"#{r:X2}{g:X2}{b:X2}";
-                    UpdateHslFromRgb(r, g, b);
-                    UpdateColorPreview(r, g, b);
-                }
+                ClearResults();
             }
-            catch { }
-
-            isUpdating = false;
         }
 
-        private void HslTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void ProcessHexColor(string hexColor)
         {
-            if (isUpdating) return;
-            isUpdating = true;
-
-            try
+            hexColor = hexColor.TrimStart('#');
+            if (hexColor.Length != 6)
             {
-                if (double.TryParse(HueTextBox.Text, out double h) &&
-                    double.TryParse(SaturationTextBox.Text, out double s) &&
-                    double.TryParse(LightnessTextBox.Text, out double l))
-                {
-                    var (r, g, b) = HslToRgb(h, s, l);
-                    RedTextBox.Text = r.ToString();
-                    GreenTextBox.Text = g.ToString();
-                    BlueTextBox.Text = b.ToString();
-                    HexTextBox.Text = $"#{r:X2}{g:X2}{b:X2}";
-                    UpdateColorPreview(r, g, b);
-                }
+                throw new FormatException("HEX颜色格式无效");
             }
-            catch { }
 
-            isUpdating = false;
+            int r = Convert.ToInt32(hexColor.Substring(0, 2), 16);
+            int g = Convert.ToInt32(hexColor.Substring(2, 2), 16);
+            int b = Convert.ToInt32(hexColor.Substring(4, 2), 16);
+
+            UpdateColorPreview(r, g, b);
+            UpdateResults(hexColor, $"{r},{g},{b}", RgbToHsl(r, g, b));
         }
 
-        private void UpdateHslFromRgb(byte r, byte g, byte b)
+        private void ProcessRgbColor(string rgbColor)
         {
-            var (h, s, l) = RgbToHsl(r, g, b);
-            HueTextBox.Text = Math.Round(h, 1).ToString();
-            SaturationTextBox.Text = Math.Round(s, 1).ToString();
-            LightnessTextBox.Text = Math.Round(l, 1).ToString();
+            var match = Regex.Match(rgbColor, @"(\d+)\s*,\s*(\d+)\s*,\s*(\d+)");
+            if (!match.Success)
+            {
+                throw new FormatException("RGB颜色格式无效");
+            }
+
+            int r = int.Parse(match.Groups[1].Value);
+            int g = int.Parse(match.Groups[2].Value);
+            int b = int.Parse(match.Groups[3].Value);
+
+            if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+            {
+                throw new FormatException("RGB值必须在0-255之间");
+            }
+
+            UpdateColorPreview(r, g, b);
+            UpdateResults(
+                $"{r:X2}{g:X2}{b:X2}",
+                $"{r},{g},{b}",
+                RgbToHsl(r, g, b)
+            );
         }
 
-        private void UpdateColorPreview(byte r, byte g, byte b)
+        private void ProcessHslColor(string hslColor)
         {
-            ColorPreview.Background = new SolidColorBrush(Color.FromArgb(255, r, g, b));
+            var match = Regex.Match(hslColor, @"(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%");
+            if (!match.Success)
+            {
+                throw new FormatException("HSL颜色格式无效");
+            }
+
+            int h = int.Parse(match.Groups[1].Value);
+            int s = int.Parse(match.Groups[2].Value);
+            int l = int.Parse(match.Groups[3].Value);
+
+            if (h < 0 || h > 360 || s < 0 || s > 100 || l < 0 || l > 100)
+            {
+                throw new FormatException("HSL值无效");
+            }
+
+            var (r, g, b) = HslToRgb(h, s, l);
+            UpdateColorPreview(r, g, b);
+            UpdateResults(
+                $"{r:X2}{g:X2}{b:X2}",
+                $"{r},{g},{b}",
+                $"{h},{s}%,{l}%"
+            );
         }
 
-        private (double h, double s, double l) RgbToHsl(byte r, byte g, byte b)
+        private void UpdateColorPreview(int r, int g, int b)
         {
-            double rf = r / 255.0;
-            double gf = g / 255.0;
-            double bf = b / 255.0;
+            ColorPreviewBorder.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Color.FromArgb(255, (byte)r, (byte)g, (byte)b)
+            );
+        }
 
-            double max = Math.Max(Math.Max(rf, gf), bf);
-            double min = Math.Min(Math.Min(rf, gf), bf);
-            double delta = max - min;
+        private void UpdateResults(string hex, string rgb, string hsl)
+        {
+            HexResultTextBox.Text = hex;
+            RgbResultTextBox.Text = rgb;
+            HslResultTextBox.Text = hsl;
+        }
 
-            double h = 0;
-            double s = 0;
-            double l = (max + min) / 2;
+        private void ClearResults()
+        {
+            HexResultTextBox.Text = string.Empty;
+            RgbResultTextBox.Text = string.Empty;
+            HslResultTextBox.Text = string.Empty;
+            ColorPreviewBorder.Background = null;
+        }
+
+        private string RgbToHsl(int r, int g, int b)
+        {
+            float rf = r / 255f;
+            float gf = g / 255f;
+            float bf = b / 255f;
+
+            float max = Math.Max(rf, Math.Max(gf, bf));
+            float min = Math.Min(rf, Math.Min(gf, bf));
+            float delta = max - min;
+
+            float h = 0;
+            float s = 0;
+            float l = (max + min) / 2;
 
             if (delta != 0)
             {
-                s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+                s = l > 0.5f ? delta / (2f - max - min) : delta / (max + min);
 
                 if (max == rf)
+                {
                     h = (gf - bf) / delta + (gf < bf ? 6 : 0);
+                }
                 else if (max == gf)
+                {
                     h = (bf - rf) / delta + 2;
+                }
                 else
+                {
                     h = (rf - gf) / delta + 4;
+                }
 
                 h *= 60;
             }
 
-            return (h, s * 100, l * 100);
+            return $"{Math.Round(h)},{Math.Round(s * 100)}%,{Math.Round(l * 100)}%";
         }
 
-        private (byte r, byte g, byte b) HslToRgb(double h, double s, double l)
+        private (int r, int g, int b) HslToRgb(int h, int s, int l)
         {
-            s /= 100;
-            l /= 100;
+            float hf = h / 360f;
+            float sf = s / 100f;
+            float lf = l / 100f;
 
-            double c = (1 - Math.Abs(2 * l - 1)) * s;
-            double x = c * (1 - Math.Abs((h / 60) % 2 - 1));
-            double m = l - c / 2;
+            float q = lf < 0.5f ? lf * (1 + sf) : lf + sf - lf * sf;
+            float p = 2 * lf - q;
 
-            double rf = 0, gf = 0, bf = 0;
-
-            if (h >= 0 && h < 60)
-            {
-                rf = c; gf = x; bf = 0;
-            }
-            else if (h >= 60 && h < 120)
-            {
-                rf = x; gf = c; bf = 0;
-            }
-            else if (h >= 120 && h < 180)
-            {
-                rf = 0; gf = c; bf = x;
-            }
-            else if (h >= 180 && h < 240)
-            {
-                rf = 0; gf = x; bf = c;
-            }
-            else if (h >= 240 && h < 300)
-            {
-                rf = x; gf = 0; bf = c;
-            }
-            else if (h >= 300 && h < 360)
-            {
-                rf = c; gf = 0; bf = x;
-            }
+            float r = HueToRgb(p, q, hf + 1/3f);
+            float g = HueToRgb(p, q, hf);
+            float b = HueToRgb(p, q, hf - 1/3f);
 
             return (
-                (byte)Math.Round((rf + m) * 255),
-                (byte)Math.Round((gf + m) * 255),
-                (byte)Math.Round((bf + m) * 255)
+                (int)Math.Round(r * 255),
+                (int)Math.Round(g * 255),
+                (int)Math.Round(b * 255)
             );
+        }
+
+        private float HueToRgb(float p, float q, float t)
+        {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6f) return p + (q - p) * 6 * t;
+            if (t < 1/2f) return q;
+            if (t < 2/3f) return p + (q - p) * (2/3f - t) * 6;
+            return p;
         }
 
         private async void CopyHexButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(HexTextBox.Text))
+            if (!string.IsNullOrEmpty(HexResultTextBox.Text))
             {
                 var dataPackage = new DataPackage();
-                dataPackage.SetText(HexTextBox.Text);
+                dataPackage.SetText(HexResultTextBox.Text);
                 Clipboard.SetContent(dataPackage);
 
                 var dialog = new ContentDialog
@@ -197,11 +228,9 @@ namespace UwpTools.Views
 
         private async void CopyRgbButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(RedTextBox.Text) &&
-                !string.IsNullOrEmpty(GreenTextBox.Text) &&
-                !string.IsNullOrEmpty(BlueTextBox.Text))
+            if (!string.IsNullOrEmpty(RgbResultTextBox.Text))
             {
-                var text = $"RGB({RedTextBox.Text}, {GreenTextBox.Text}, {BlueTextBox.Text})";
+                var text = $"RGB({RgbResultTextBox.Text})";
                 var dataPackage = new DataPackage();
                 dataPackage.SetText(text);
                 Clipboard.SetContent(dataPackage);
@@ -219,11 +248,9 @@ namespace UwpTools.Views
 
         private async void CopyHslButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(HueTextBox.Text) &&
-                !string.IsNullOrEmpty(SaturationTextBox.Text) &&
-                !string.IsNullOrEmpty(LightnessTextBox.Text))
+            if (!string.IsNullOrEmpty(HslResultTextBox.Text))
             {
-                var text = $"HSL({HueTextBox.Text}, {SaturationTextBox.Text}%, {LightnessTextBox.Text}%)";
+                var text = $"HSL({HslResultTextBox.Text})";
                 var dataPackage = new DataPackage();
                 dataPackage.SetText(text);
                 Clipboard.SetContent(dataPackage);

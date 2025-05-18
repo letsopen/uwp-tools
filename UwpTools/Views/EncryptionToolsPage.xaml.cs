@@ -34,169 +34,195 @@ namespace UwpTools.Views
             {
                 case "base64":
                     KeyTextBox.Visibility = Visibility.Collapsed;
-                    KeyPasswordBox.Visibility = Visibility.Collapsed;
-                    break;
-                case "rsa":
-                    KeyTextBox.Visibility = Visibility.Visible;
-                    KeyPasswordBox.Visibility = Visibility.Collapsed;
                     break;
                 default:
-                    KeyTextBox.Visibility = Visibility.Collapsed;
-                    KeyPasswordBox.Visibility = Visibility.Visible;
+                    KeyTextBox.Visibility = Visibility.Visible;
                     break;
             }
         }
 
         private void EncryptButton_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrEmpty(InputTextBox.Text))
+            {
+                ShowError("请输入要加密的文本");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(KeyTextBox.Text))
+            {
+                ShowError("请输入密钥");
+                return;
+            }
+
+            if (AlgorithmComboBox.SelectedItem == null)
+            {
+                ShowError("请选择加密算法");
+                return;
+            }
+
             try
             {
-                string input = InputTextBox.Text;
-                if (string.IsNullOrEmpty(input))
-                {
-                    return;
-                }
-
-                string result = currentAlgorithm switch
-                {
-                    "aes" => EncryptAes(input, KeyPasswordBox.Password),
-                    "des" => EncryptDes(input, KeyPasswordBox.Password),
-                    "rsa" => EncryptRsa(input, KeyTextBox.Text),
-                    "base64" => Convert.ToBase64String(Encoding.UTF8.GetBytes(input)),
-                    _ => throw new NotSupportedException("不支持的加密算法")
-                };
-
+                var algorithm = (AlgorithmComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "AES";
+                string result = EncryptText(InputTextBox.Text, KeyTextBox.Text, algorithm);
                 OutputTextBox.Text = result;
             }
             catch (Exception ex)
             {
-                OutputTextBox.Text = $"加密错误：{ex.Message}";
+                ShowError($"加密失败: {ex.Message}");
             }
         }
 
         private void DecryptButton_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrEmpty(InputTextBox.Text))
+            {
+                ShowError("请输入要解密的文本");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(KeyTextBox.Text))
+            {
+                ShowError("请输入密钥");
+                return;
+            }
+
+            if (AlgorithmComboBox.SelectedItem == null)
+            {
+                ShowError("请选择加密算法");
+                return;
+            }
+
             try
             {
-                string input = InputTextBox.Text;
-                if (string.IsNullOrEmpty(input))
-                {
-                    return;
-                }
-
-                string result = currentAlgorithm switch
-                {
-                    "aes" => DecryptAes(input, KeyPasswordBox.Password),
-                    "des" => DecryptDes(input, KeyPasswordBox.Password),
-                    "rsa" => DecryptRsa(input, KeyTextBox.Text),
-                    "base64" => Encoding.UTF8.GetString(Convert.FromBase64String(input)),
-                    _ => throw new NotSupportedException("不支持的加密算法")
-                };
-
+                var algorithm = (AlgorithmComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "AES";
+                string result = DecryptText(InputTextBox.Text, KeyTextBox.Text, algorithm);
                 OutputTextBox.Text = result;
             }
             catch (Exception ex)
             {
-                OutputTextBox.Text = $"解密错误：{ex.Message}";
+                ShowError($"解密失败: {ex.Message}");
             }
         }
 
-        private string EncryptAes(string plainText, string password)
+        private string EncryptText(string text, string key, string algorithm)
+        {
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+            byte[] textBytes = Encoding.UTF8.GetBytes(text);
+
+            return algorithm switch
+            {
+                "AES" => EncryptAes(textBytes, keyBytes),
+                "DES" => EncryptDes(textBytes, keyBytes),
+                "RSA" => EncryptRsa(textBytes),
+                _ => throw new ArgumentException("不支持的加密算法")
+            };
+        }
+
+        private string DecryptText(string text, string key, string algorithm)
+        {
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+            byte[] textBytes = Convert.FromBase64String(text);
+
+            return algorithm switch
+            {
+                "AES" => DecryptAes(textBytes, keyBytes),
+                "DES" => DecryptDes(textBytes, keyBytes),
+                "RSA" => DecryptRsa(textBytes),
+                _ => throw new ArgumentException("不支持的加密算法")
+            };
+        }
+
+        private string EncryptAes(byte[] data, byte[] key)
         {
             using var aes = Aes.Create();
-            var key = new Rfc2898DeriveBytes(password, new byte[8], 100000, HashAlgorithmName.SHA256);
-            aes.Key = key.GetBytes(32);
-            aes.IV = key.GetBytes(16);
+            aes.Key = key;
+            aes.GenerateIV();
 
-            using var ms = new MemoryStream();
-            using (var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
-            using (var sw = new StreamWriter(cs))
-            {
-                sw.Write(plainText);
-            }
+            using var encryptor = aes.CreateEncryptor();
+            byte[] encrypted = encryptor.TransformFinalBlock(data, 0, data.Length);
 
-            return Convert.ToBase64String(ms.ToArray());
+            byte[] result = new byte[aes.IV.Length + encrypted.Length];
+            Buffer.BlockCopy(aes.IV, 0, result, 0, aes.IV.Length);
+            Buffer.BlockCopy(encrypted, 0, result, aes.IV.Length, encrypted.Length);
+
+            return Convert.ToBase64String(result);
         }
 
-        private string DecryptAes(string cipherText, string password)
+        private string DecryptAes(byte[] data, byte[] key)
         {
             using var aes = Aes.Create();
-            var key = new Rfc2898DeriveBytes(password, new byte[8], 100000, HashAlgorithmName.SHA256);
-            aes.Key = key.GetBytes(32);
-            aes.IV = key.GetBytes(16);
+            aes.Key = key;
 
-            using var ms = new MemoryStream(Convert.FromBase64String(cipherText));
-            using var cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Read);
-            using var sr = new StreamReader(cs);
-            return sr.ReadToEnd();
+            byte[] iv = new byte[aes.BlockSize / 8];
+            byte[] encrypted = new byte[data.Length - iv.Length];
+
+            Buffer.BlockCopy(data, 0, iv, 0, iv.Length);
+            Buffer.BlockCopy(data, iv.Length, encrypted, 0, encrypted.Length);
+
+            aes.IV = iv;
+            using var decryptor = aes.CreateDecryptor();
+            byte[] decrypted = decryptor.TransformFinalBlock(encrypted, 0, encrypted.Length);
+
+            return Encoding.UTF8.GetString(decrypted);
         }
 
-        private string EncryptDes(string plainText, string password)
+        private string EncryptDes(byte[] data, byte[] key)
         {
             using var des = DES.Create();
-            var key = new Rfc2898DeriveBytes(password, new byte[8], 100000, HashAlgorithmName.SHA256);
-            des.Key = key.GetBytes(8);
-            des.IV = key.GetBytes(8);
+            des.Key = key;
+            des.GenerateIV();
 
-            using var ms = new MemoryStream();
-            using (var cs = new CryptoStream(ms, des.CreateEncryptor(), CryptoStreamMode.Write))
-            using (var sw = new StreamWriter(cs))
-            {
-                sw.Write(plainText);
-            }
+            using var encryptor = des.CreateEncryptor();
+            byte[] encrypted = encryptor.TransformFinalBlock(data, 0, data.Length);
 
-            return Convert.ToBase64String(ms.ToArray());
+            byte[] result = new byte[des.IV.Length + encrypted.Length];
+            Buffer.BlockCopy(des.IV, 0, result, 0, des.IV.Length);
+            Buffer.BlockCopy(encrypted, 0, result, des.IV.Length, encrypted.Length);
+
+            return Convert.ToBase64String(result);
         }
 
-        private string DecryptDes(string cipherText, string password)
+        private string DecryptDes(byte[] data, byte[] key)
         {
             using var des = DES.Create();
-            var key = new Rfc2898DeriveBytes(password, new byte[8], 100000, HashAlgorithmName.SHA256);
-            des.Key = key.GetBytes(8);
-            des.IV = key.GetBytes(8);
+            des.Key = key;
 
-            using var ms = new MemoryStream(Convert.FromBase64String(cipherText));
-            using var cs = new CryptoStream(ms, des.CreateDecryptor(), CryptoStreamMode.Read);
-            using var sr = new StreamReader(cs);
-            return sr.ReadToEnd();
+            byte[] iv = new byte[des.BlockSize / 8];
+            byte[] encrypted = new byte[data.Length - iv.Length];
+
+            Buffer.BlockCopy(data, 0, iv, 0, iv.Length);
+            Buffer.BlockCopy(data, iv.Length, encrypted, 0, encrypted.Length);
+
+            des.IV = iv;
+            using var decryptor = des.CreateDecryptor();
+            byte[] decrypted = decryptor.TransformFinalBlock(encrypted, 0, encrypted.Length);
+
+            return Encoding.UTF8.GetString(decrypted);
         }
 
-        private string EncryptRsa(string plainText, string publicKey)
+        private string EncryptRsa(byte[] data)
         {
             using var rsa = RSA.Create();
-            rsa.ImportFromPem(publicKey);
-
-            byte[] data = Encoding.UTF8.GetBytes(plainText);
             byte[] encrypted = rsa.Encrypt(data, RSAEncryptionPadding.OaepSHA256);
             return Convert.ToBase64String(encrypted);
         }
 
-        private string DecryptRsa(string cipherText, string privateKey)
+        private string DecryptRsa(byte[] data)
         {
             using var rsa = RSA.Create();
-            rsa.ImportFromPem(privateKey);
-
-            byte[] data = Convert.FromBase64String(cipherText);
             byte[] decrypted = rsa.Decrypt(data, RSAEncryptionPadding.OaepSHA256);
             return Encoding.UTF8.GetString(decrypted);
         }
 
-        private async void CopyButton_Click(object sender, RoutedEventArgs e)
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(OutputTextBox.Text))
             {
-                var dataPackage = new DataPackage();
+                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
                 dataPackage.SetText(OutputTextBox.Text);
-                Clipboard.SetContent(dataPackage);
-
-                var dialog = new ContentDialog
-                {
-                    Title = "提示",
-                    Content = "已复制到剪贴板",
-                    CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
-                };
-                await dialog.ShowAsync();
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+                ShowMessage("已复制到剪贴板");
             }
         }
 
@@ -205,7 +231,31 @@ namespace UwpTools.Views
             InputTextBox.Text = string.Empty;
             OutputTextBox.Text = string.Empty;
             KeyTextBox.Text = string.Empty;
-            KeyPasswordBox.Password = string.Empty;
+            AlgorithmComboBox.SelectedItem = null;
+        }
+
+        private void ShowError(string message)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "错误",
+                Content = message,
+                CloseButtonText = "确定",
+                XamlRoot = this.XamlRoot
+            };
+            _ = dialog.ShowAsync();
+        }
+
+        private void ShowMessage(string message)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "提示",
+                Content = message,
+                CloseButtonText = "确定",
+                XamlRoot = this.XamlRoot
+            };
+            _ = dialog.ShowAsync();
         }
     }
 } 

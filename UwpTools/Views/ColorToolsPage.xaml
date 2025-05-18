@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UwpTools.Views.ColorToolsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,112 +13,49 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="颜色工具" 
-                   Style="{StaticResource TitleTextBlockStyle}"
+                   Style="{ThemeResource TitleLargeTextBlockStyle}"
                    Margin="0,0,0,20"/>
 
-        <Grid Grid.Row="1" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="HEX:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"/>
-            <TextBox x:Name="HexTextBox"
-                     PlaceholderText="#RRGGBB"
-                     TextChanged="HexTextBox_TextChanged"/>
-            <Button x:Name="CopyHexButton"
-                    Content="复制"
-                    Click="CopyHexButton_Click"
-                    Grid.Column="2"
-                    Margin="10,0,0,0"/>
-        </Grid>
+        <StackPanel Grid.Row="1" Spacing="15" Margin="0,0,0,20">
+            <TextBox x:Name="ColorInputTextBox"
+                     Header="颜色值"
+                     PlaceholderText="输入颜色值（HEX、RGB、HSL）"/>
+            
+            <ComboBox x:Name="ColorFormatComboBox"
+                      Header="颜色格式"
+                      PlaceholderText="选择颜色格式">
+                <ComboBoxItem Content="HEX" Tag="HEX"/>
+                <ComboBoxItem Content="RGB" Tag="RGB"/>
+                <ComboBoxItem Content="HSL" Tag="HSL"/>
+            </ComboBox>
+        </StackPanel>
 
-        <Grid Grid.Row="2" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="RGB:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="RedTextBox"
-                         Width="60"
-                         PlaceholderText="R"
-                         TextChanged="RgbTextBox_TextChanged"/>
-                <TextBox x:Name="GreenTextBox"
-                         Width="60"
-                         PlaceholderText="G"
-                         Margin="10,0"
-                         TextChanged="RgbTextBox_TextChanged"/>
-                <TextBox x:Name="BlueTextBox"
-                         Width="60"
-                         PlaceholderText="B"
-                         TextChanged="RgbTextBox_TextChanged"/>
-            </StackPanel>
-            <Button x:Name="CopyRgbButton"
-                    Content="复制"
-                    Click="CopyRgbButton_Click"
-                    Grid.Column="2"
-                    Margin="10,0,0,0"/>
-        </Grid>
-
-        <Grid Grid.Row="3" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="HSL:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="HueTextBox"
-                         Width="60"
-                         PlaceholderText="H"
-                         TextChanged="HslTextBox_TextChanged"/>
-                <TextBox x:Name="SaturationTextBox"
-                         Width="60"
-                         PlaceholderText="S"
-                         Margin="10,0"
-                         TextChanged="HslTextBox_TextChanged"/>
-                <TextBox x:Name="LightnessTextBox"
-                         Width="60"
-                         PlaceholderText="L"
-                         TextChanged="HslTextBox_TextChanged"/>
-            </StackPanel>
-            <Button x:Name="CopyHslButton"
-                    Content="复制"
-                    Click="CopyHslButton_Click"
-                    Grid.Column="2"
-                    Margin="10,0,0,0"/>
-        </Grid>
-
-        <Border Grid.Row="4"
+        <Border Grid.Row="2" 
+                x:Name="ColorPreviewBorder"
+                Height="100"
                 BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
                 BorderThickness="1"
-                Padding="10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="预览："
-                           VerticalAlignment="Center"
-                           Margin="0,0,10,0"/>
-                <Border x:Name="ColorPreview"
-                        Background="Transparent"
-                        Width="100"
-                        Height="100"/>
-            </Grid>
-        </Border>
+                Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="3" Spacing="15">
+            <TextBlock Text="转换结果" 
+                       Style="{ThemeResource SubtitleTextBlockStyle}"/>
+            
+            <TextBox x:Name="HexResultTextBox"
+                     Header="HEX"
+                     IsReadOnly="True"/>
+            
+            <TextBox x:Name="RgbResultTextBox"
+                     Header="RGB"
+                     IsReadOnly="True"/>
+            
+            <TextBox x:Name="HslResultTextBox"
+                     Header="HSL"
+                     IsReadOnly="True"/>
+        </StackPanel>
     </Grid>
 </Page> 

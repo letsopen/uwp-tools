@@ -1,232 +1,70 @@
-using System;
-using System.Text;
-using System.Xml;
-using System.Xml.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.ApplicationModel.DataTransfer;
-using Markdig;
+using System;
+using System.Text;
+using System.Security.Cryptography;
+using System.Web;
 
 namespace UwpTools.Views
 {
     public sealed partial class DevToolsPage : Page
     {
-        private string currentToolType = "sql";
-
         public DevToolsPage()
         {
             this.InitializeComponent();
-            ToolTypeComboBox.SelectedIndex = 0;
         }
 
-        private void ToolTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ProcessButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ToolTypeComboBox.SelectedItem is ComboBoxItem selectedItem && 
-                selectedItem.Tag is string toolType)
+            if (string.IsNullOrEmpty(InputTextBox.Text))
             {
-                currentToolType = toolType;
-                UpdateUI();
+                ShowError("请输入要处理的文本");
+                return;
             }
-        }
 
-        private void UpdateUI()
-        {
-            switch (currentToolType)
+            if (ToolTypeComboBox.SelectedItem == null)
             {
-                case "markdown":
-                    PreviewWebView.Visibility = Visibility.Visible;
-                    OutputTextBox.Visibility = Visibility.Collapsed;
-                    FormatButton.Content = "预览";
-                    break;
-                default:
-                    PreviewWebView.Visibility = Visibility.Collapsed;
-                    OutputTextBox.Visibility = Visibility.Visible;
-                    FormatButton.Content = "格式化";
-                    break;
+                ShowError("请选择工具类型");
+                return;
             }
-        }
 
-        private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (currentToolType == "markdown")
-            {
-                UpdateMarkdownPreview();
-            }
-        }
-
-        private void FormatButton_Click(object sender, RoutedEventArgs e)
-        {
-            switch (currentToolType)
-            {
-                case "sql":
-                    FormatSql();
-                    break;
-                case "xml":
-                    FormatXml();
-                    break;
-                case "markdown":
-                    UpdateMarkdownPreview();
-                    break;
-            }
-        }
-
-        private void FormatSql()
-        {
             try
             {
-                string sql = InputTextBox.Text;
-                if (string.IsNullOrWhiteSpace(sql))
-                {
-                    return;
-                }
-
-                var formatted = new StringBuilder();
-                int indent = 0;
-                bool newLine = true;
-
-                foreach (char c in sql)
-                {
-                    if (newLine)
-                    {
-                        formatted.Append(new string(' ', indent * 4));
-                        newLine = false;
-                    }
-
-                    switch (c)
-                    {
-                        case '(':
-                            formatted.Append(c);
-                            indent++;
-                            formatted.AppendLine();
-                            newLine = true;
-                            break;
-                        case ')':
-                            indent--;
-                            formatted.AppendLine();
-                            formatted.Append(new string(' ', indent * 4));
-                            formatted.Append(c);
-                            break;
-                        case ',':
-                            formatted.Append(c);
-                            formatted.AppendLine();
-                            newLine = true;
-                            break;
-                        case ' ':
-                            if (!newLine)
-                            {
-                                formatted.Append(c);
-                            }
-                            break;
-                        default:
-                            formatted.Append(c);
-                            break;
-                    }
-                }
-
-                OutputTextBox.Text = formatted.ToString();
+                var toolType = (ToolTypeComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Base64Encode";
+                string result = ProcessText(InputTextBox.Text, toolType);
+                OutputTextBox.Text = result;
             }
             catch (Exception ex)
             {
-                OutputTextBox.Text = $"格式化错误：{ex.Message}";
+                ShowError($"处理失败: {ex.Message}");
             }
         }
 
-        private void FormatXml()
+        private string ProcessText(string input, string toolType)
         {
-            try
+            return toolType switch
             {
-                string xml = InputTextBox.Text;
-                if (string.IsNullOrWhiteSpace(xml))
-                {
-                    return;
-                }
-
-                var doc = XDocument.Parse(xml);
-                var settings = new XmlWriterSettings
-                {
-                    Indent = true,
-                    IndentChars = "    ",
-                    NewLineChars = "\r\n",
-                    NewLineHandling = NewLineHandling.Replace
-                };
-
-                var builder = new StringBuilder();
-                using (var writer = XmlWriter.Create(builder, settings))
-                {
-                    doc.Save(writer);
-                }
-
-                OutputTextBox.Text = builder.ToString();
-            }
-            catch (Exception ex)
-            {
-                OutputTextBox.Text = $"格式化错误：{ex.Message}";
-            }
+                "Base64Encode" => Convert.ToBase64String(Encoding.UTF8.GetBytes(input)),
+                "Base64Decode" => Encoding.UTF8.GetString(Convert.FromBase64String(input)),
+                "UrlEncode" => HttpUtility.UrlEncode(input),
+                "UrlDecode" => HttpUtility.UrlDecode(input),
+                "HtmlEncode" => HttpUtility.HtmlEncode(input),
+                "HtmlDecode" => HttpUtility.HtmlDecode(input),
+                "Md5Hash" => BitConverter.ToString(MD5.HashData(Encoding.UTF8.GetBytes(input))).Replace("-", "").ToLower(),
+                "Sha1Hash" => BitConverter.ToString(SHA1.HashData(Encoding.UTF8.GetBytes(input))).Replace("-", "").ToLower(),
+                "Sha256Hash" => BitConverter.ToString(SHA256.HashData(Encoding.UTF8.GetBytes(input))).Replace("-", "").ToLower(),
+                _ => throw new ArgumentException("不支持的工具类型")
+            };
         }
 
-        private async void UpdateMarkdownPreview()
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (!string.IsNullOrEmpty(OutputTextBox.Text))
             {
-                string markdown = InputTextBox.Text;
-                if (string.IsNullOrWhiteSpace(markdown))
-                {
-                    return;
-                }
-
-                string html = Markdown.ToHtml(markdown);
-                string fullHtml = $@"
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset='utf-8'>
-                        <style>
-                            body {{ font-family: 'Segoe UI', sans-serif; padding: 20px; }}
-                            pre {{ background-color: #f5f5f5; padding: 10px; border-radius: 5px; }}
-                            code {{ background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; }}
-                            table {{ border-collapse: collapse; width: 100%; }}
-                            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-                            th {{ background-color: #f5f5f5; }}
-                        </style>
-                    </head>
-                    <body>
-                        {html}
-                    </body>
-                    </html>";
-
-                await PreviewWebView.EnsureCoreWebView2Async();
-                PreviewWebView.CoreWebView2.NavigateToString(fullHtml);
-            }
-            catch (Exception ex)
-            {
-                var dialog = new ContentDialog
-                {
-                    Title = "错误",
-                    Content = $"预览错误：{ex.Message}",
-                    CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
-                };
-                await dialog.ShowAsync();
-            }
-        }
-
-        private async void CopyButton_Click(object sender, RoutedEventArgs e)
-        {
-            string textToCopy = currentToolType == "markdown" ? InputTextBox.Text : OutputTextBox.Text;
-            if (!string.IsNullOrEmpty(textToCopy))
-            {
-                var dataPackage = new DataPackage();
-                dataPackage.SetText(textToCopy);
-                Clipboard.SetContent(dataPackage);
-
-                var dialog = new ContentDialog
-                {
-                    Title = "提示",
-                    Content = "已复制到剪贴板",
-                    CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
-                };
-                await dialog.ShowAsync();
+                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                dataPackage.SetText(OutputTextBox.Text);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+                ShowMessage("已复制到剪贴板");
             }
         }
 
@@ -234,10 +72,31 @@ namespace UwpTools.Views
         {
             InputTextBox.Text = string.Empty;
             OutputTextBox.Text = string.Empty;
-            if (currentToolType == "markdown")
+            ToolTypeComboBox.SelectedItem = null;
+        }
+
+        private void ShowError(string message)
+        {
+            var dialog = new ContentDialog
             {
-                PreviewWebView.CoreWebView2?.NavigateToString(string.Empty);
-            }
+                Title = "错误",
+                Content = message,
+                CloseButtonText = "确定",
+                XamlRoot = this.XamlRoot
+            };
+            _ = dialog.ShowAsync();
+        }
+
+        private void ShowMessage(string message)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "提示",
+                Content = message,
+                CloseButtonText = "确定",
+                XamlRoot = this.XamlRoot
+            };
+            _ = dialog.ShowAsync();
         }
     }
 } 
