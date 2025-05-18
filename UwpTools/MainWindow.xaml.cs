@@ -88,13 +88,6 @@ namespace UwpTools
                 },
                 new ToolItem
                 {
-                    Title = "编码转换",
-                    Description = "文本编码转换工具",
-                    Icon = "Text",
-                    PageType = typeof(EncodingToolsPage)
-                },
-                new ToolItem
-                {
                     Title = "正则表达式",
                     Description = "正则表达式测试工具",
                     Icon = "Regex",
