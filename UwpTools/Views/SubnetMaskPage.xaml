@@ -13,56 +13,115 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="子网掩码计算工具" 
-                   Style="{StaticResource TitleTextBlockStyle}"
+                   Style="{ThemeResource TitleLargeTextBlockStyle}"
                    Margin="0,0,0,20"/>
 
-        <Grid Grid.Row="1" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="IP地址："
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"/>
-            <TextBox x:Name="IpAddressTextBox"
-                     PlaceholderText="例如：192.168.1.1"
-                     TextChanged="IpAddress_TextChanged"/>
-        </Grid>
+        <StackPanel Grid.Row="1" Spacing="12" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="IP地址：" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+                <TextBox x:Name="IpAddressTextBox" 
+                         Grid.Column="1"
+                         PlaceholderText="例如：192.168.1.1"/>
+            </Grid>
 
-        <Grid Grid.Row="2" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="子网掩码："
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"/>
-            <ComboBox x:Name="SubnetMaskComboBox"
-                      PlaceholderText="选择子网掩码"
-                      SelectionChanged="SubnetMask_SelectionChanged">
-                <ComboBoxItem Content="/24 (255.255.255.0)" Tag="24"/>
-                <ComboBoxItem Content="/16 (255.255.0.0)" Tag="16"/>
-                <ComboBoxItem Content="/8 (255.0.0.0)" Tag="8"/>
-                <ComboBoxItem Content="/20 (255.255.240.0)" Tag="20"/>
-                <ComboBoxItem Content="/28 (255.255.255.240)" Tag="28"/>
-            </ComboBox>
-        </Grid>
-
-        <StackPanel Grid.Row="3" Spacing="10">
-            <TextBlock Text="计算结果："
-                       Style="{StaticResource SubtitleTextBlockStyle}"/>
-            <TextBlock x:Name="NetworkAddressText"
-                       TextWrapping="Wrap"/>
-            <TextBlock x:Name="BroadcastAddressText"
-                       TextWrapping="Wrap"/>
-            <TextBlock x:Name="UsableIpRangeText"
-                       TextWrapping="Wrap"/>
-            <TextBlock x:Name="TotalHostsText"
-                       TextWrapping="Wrap"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="子网掩码：" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+                <ComboBox x:Name="SubnetMaskComboBox" 
+                          Grid.Column="1"
+                          PlaceholderText="选择子网掩码">
+                    <ComboBoxItem Content="255.255.255.0 (/24)" Tag="24"/>
+                    <ComboBoxItem Content="255.255.0.0 (/16)" Tag="16"/>
+                    <ComboBoxItem Content="255.0.0.0 (/8)" Tag="8"/>
+                    <ComboBoxItem Content="255.255.255.128 (/25)" Tag="25"/>
+                    <ComboBoxItem Content="255.255.255.192 (/26)" Tag="26"/>
+                    <ComboBoxItem Content="255.255.255.224 (/27)" Tag="27"/>
+                    <ComboBoxItem Content="255.255.255.240 (/28)" Tag="28"/>
+                    <ComboBoxItem Content="255.255.255.248 (/29)" Tag="29"/>
+                    <ComboBoxItem Content="255.255.255.252 (/30)" Tag="30"/>
+                </ComboBox>
+            </Grid>
         </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12" Margin="0,0,0,20">
+            <Button x:Name="CalculateButton" 
+                    Content="计算" 
+                    Click="CalculateButton_Click"/>
+            <Button x:Name="ClearButton" 
+                    Content="清除" 
+                    Click="ClearButton_Click"/>
+        </StackPanel>
+
+        <Grid Grid.Row="3" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="网络地址：" 
+                       VerticalAlignment="Center"
+                       Margin="0,0,12,0"/>
+            <TextBox x:Name="NetworkAddressTextBox" 
+                     Grid.Column="1"
+                     IsReadOnly="True"/>
+        </Grid>
+
+        <Grid Grid.Row="4" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="广播地址：" 
+                       VerticalAlignment="Center"
+                       Margin="0,0,12,0"/>
+            <TextBox x:Name="BroadcastAddressTextBox" 
+                     Grid.Column="1"
+                     IsReadOnly="True"/>
+        </Grid>
+
+        <Grid Grid.Row="5" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="可用IP数：" 
+                       VerticalAlignment="Center"
+                       Margin="0,0,12,0"/>
+            <TextBox x:Name="AvailableIpsTextBox" 
+                     Grid.Column="1"
+                     IsReadOnly="True"/>
+        </Grid>
+
+        <Grid Grid.Row="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="IP范围：" 
+                       VerticalAlignment="Top"
+                       Margin="0,0,12,0"/>
+            <TextBox x:Name="IpRangeTextBox" 
+                     Grid.Column="1"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     IsReadOnly="True"/>
+        </Grid>
     </Grid>
 </Page> 

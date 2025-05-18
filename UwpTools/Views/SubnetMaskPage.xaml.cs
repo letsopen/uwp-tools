@@ -1,5 +1,7 @@
 using System;
 using System.Net;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -10,81 +12,95 @@ namespace UwpTools.Views
         public SubnetMaskPage()
         {
             this.InitializeComponent();
-            SubnetMaskComboBox.SelectedIndex = 0;
         }
 
-        private void IpAddress_TextChanged(object sender, TextChangedEventArgs e)
+        private void CalculateButton_Click(object sender, RoutedEventArgs e)
         {
-            CalculateSubnet();
-        }
+            if (string.IsNullOrEmpty(IpAddressTextBox.Text))
+            {
+                ShowError("请输入IP地址");
+                return;
+            }
 
-        private void SubnetMask_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            CalculateSubnet();
-        }
+            if (SubnetMaskComboBox.SelectedItem == null)
+            {
+                ShowError("请选择子网掩码");
+                return;
+            }
 
-        private void CalculateSubnet()
-        {
             try
             {
-                if (string.IsNullOrWhiteSpace(IpAddressTextBox.Text) || 
-                    SubnetMaskComboBox.SelectedItem is not ComboBoxItem selectedItem)
-                {
-                    return;
-                }
+                var ipAddress = IPAddress.Parse(IpAddressTextBox.Text);
+                var cidr = int.Parse((SubnetMaskComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "24");
+                var subnetMask = CalculateSubnetMask(cidr);
+                var networkAddress = CalculateNetworkAddress(ipAddress, subnetMask);
+                var broadcastAddress = CalculateBroadcastAddress(networkAddress, cidr);
+                var usableIps = CalculateUsableIps(cidr);
 
-                if (!IPAddress.TryParse(IpAddressTextBox.Text, out IPAddress? ipAddress))
-                {
-                    ShowError("无效的IP地址格式");
-                    return;
-                }
-
-                if (!int.TryParse(selectedItem.Tag.ToString(), out int prefixLength))
-                {
-                    ShowError("无效的子网掩码");
-                    return;
-                }
-
-                var ipBytes = ipAddress.GetAddressBytes();
-                var maskBytes = new byte[4];
-                for (int i = 0; i < 4; i++)
-                {
-                    if (prefixLength >= 8)
-                    {
-                        maskBytes[i] = 255;
-                        prefixLength -= 8;
-                    }
-                    else if (prefixLength > 0)
-                    {
-                        maskBytes[i] = (byte)(255 << (8 - prefixLength));
-                        prefixLength = 0;
-                    }
-                }
-
-                var networkAddress = new byte[4];
-                var broadcastAddress = new byte[4];
-                for (int i = 0; i < 4; i++)
-                {
-                    networkAddress[i] = (byte)(ipBytes[i] & maskBytes[i]);
-                    broadcastAddress[i] = (byte)(networkAddress[i] | ~maskBytes[i]);
-                }
-
-                var network = new IPAddress(networkAddress);
-                var broadcast = new IPAddress(broadcastAddress);
-                var usableHosts = (long)Math.Pow(2, 32 - prefixLength) - 2;
-
-                NetworkAddressText.Text = $"网络地址：{network}";
-                BroadcastAddressText.Text = $"广播地址：{broadcast}";
-                UsableIpRangeText.Text = $"可用IP范围：{network} - {broadcast}";
-                TotalHostsText.Text = $"可用主机数：{usableHosts}";
+                NetworkAddressTextBox.Text = networkAddress.ToString();
+                BroadcastAddressTextBox.Text = broadcastAddress.ToString();
+                AvailableIpsTextBox.Text = usableIps.ToString();
+                IpRangeTextBox.Text = $"可用IP范围：\n{networkAddress} - {broadcastAddress}";
             }
             catch (Exception ex)
             {
-                ShowError($"计算错误：{ex.Message}");
+                ShowError($"计算失败: {ex.Message}");
             }
         }
 
-        private async void ShowError(string message)
+        private IPAddress CalculateSubnetMask(int cidr)
+        {
+            uint mask = ~((1u << (32 - cidr)) - 1);
+            var bytes = BitConverter.GetBytes(mask);
+            Array.Reverse(bytes);
+            return new IPAddress(bytes);
+        }
+
+        private IPAddress CalculateNetworkAddress(IPAddress ip, IPAddress subnetMask)
+        {
+            byte[] ipBytes = ip.GetAddressBytes();
+            byte[] maskBytes = subnetMask.GetAddressBytes();
+            byte[] networkBytes = new byte[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                networkBytes[i] = (byte)(ipBytes[i] & maskBytes[i]);
+            }
+
+            return new IPAddress(networkBytes);
+        }
+
+        private IPAddress CalculateBroadcastAddress(IPAddress networkAddress, int cidr)
+        {
+            byte[] networkBytes = networkAddress.GetAddressBytes();
+            uint mask = ~((1u << (32 - cidr)) - 1);
+            var bytes = BitConverter.GetBytes(~mask);
+            Array.Reverse(bytes);
+
+            for (int i = 0; i < 4; i++)
+            {
+                bytes[i] |= networkBytes[i];
+            }
+
+            return new IPAddress(bytes);
+        }
+
+        private long CalculateUsableIps(int cidr)
+        {
+            return (long)Math.Pow(2, 32 - cidr) - 2;
+        }
+
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            IpAddressTextBox.Text = string.Empty;
+            SubnetMaskComboBox.SelectedItem = null;
+            NetworkAddressTextBox.Text = string.Empty;
+            BroadcastAddressTextBox.Text = string.Empty;
+            AvailableIpsTextBox.Text = string.Empty;
+            IpRangeTextBox.Text = string.Empty;
+        }
+
+        private void ShowError(string message)
         {
             var dialog = new ContentDialog
             {
@@ -93,7 +109,7 @@ namespace UwpTools.Views
                 CloseButtonText = "确定",
                 XamlRoot = this.XamlRoot
             };
-            await dialog.ShowAsync();
+            _ = dialog.ShowAsync();
         }
     }
 } 
