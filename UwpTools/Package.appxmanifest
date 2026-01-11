@@ -1,30 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
-  IgnorableNamespaces="uap rescap uap3">
+  IgnorableNamespaces="uap mp uap5 rescap">
 
-  <Identity
-    Name="92ab3962-8671-495d-b8f0-ca56c99c4bc5"
-    Publisher="CN=Administrator"
-    Version="1.0.0.0" />
+  <Identity Name="UwpTools" Publisher="CN=Administrator" Version="1.0.0.0" ProcessorArchitecture="x64" />
 
-  <mp:PhoneIdentity PhoneProductId="92ab3962-8671-495d-b8f0-ca56c99c4bc5" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
-
+  <mp:PhoneIdentity PhoneProductId="886125a6-0f00-496f-b210-3a1a08e15bed" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  
   <Properties>
     <DisplayName>UwpTools</DisplayName>
     <PublisherDisplayName>Administrator</PublisherDisplayName>
+    <Description>My application</Description>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
-    <PackageDependency Name="Microsoft.WindowsAppRuntime.1.4" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" MinVersion="1.4.2311.1500" />
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.18362.0" MaxVersionTested="10.0.19041.0" />
   </Dependencies>
 
   <Resources>
@@ -32,24 +27,16 @@
   </Resources>
 
   <Applications>
-    <Application Id="App"
-      Executable="$targetnametoken$.exe"
-      EntryPoint="$targetentrypoint$">
-      <uap:VisualElements
-        DisplayName="UwpTools"
-        Description="UwpTools"
-        BackgroundColor="transparent"
-        Square150x150Logo="Assets\Square150x150Logo.png"
-        Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="UwpTools.App">
+      <uap:VisualElements DisplayName="UwpTools" Description="My application" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.scale-200.png">
+        </uap:DefaultTile>
+        <uap:SplashScreen Image="Assets\SplashScreen.scale-200.png" />
       </uap:VisualElements>
     </Application>
   </Applications>
 
   <Capabilities>
-    <rescap:Capability Name="runFullTrust" />
-    <rescap:Capability Name="allowElevation" />
-    <rescap:Capability Name="allowPackageIdentity" />
+    <Capability Name="internetClient" />
   </Capabilities>
 </Package>
