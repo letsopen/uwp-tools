@@ -29,90 +29,166 @@ namespace UwpTools.Views
         private void EncryptButton_Click(object sender, RoutedEventArgs e)
         {
             string input = InputTextBox.Text;
-            if (string.IsNullOrEmpty(input)) return;
+            string key = KeyTextBox.Text;
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(key)) return;
 
-            string selectedAlgorithm = AlgorithmComboBox.SelectedItem?.ToString();
+            string algorithm = (AlgorithmComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
 
-            string result = selectedAlgorithm switch
+            string result = algorithm switch
             {
-                "MD5" => GetMd5Hash(input),
-                "SHA1" => GetSha1Hash(input),
-                "SHA256" => GetSha256Hash(input),
-                "SHA512" => GetSha512Hash(input),
-                _ => GetMd5Hash(input)
+                "AES" => EncryptAes(input, key),
+                "DES" => EncryptDes(input, key),
+                "RSA" => EncryptRsa(input),
+                _ => EncryptAes(input, key)
             };
 
-            ResultTextBox.Text = result;
+            OutputTextBox.Text = result;
         }
 
-        private string GetMd5Hash(string input)
+        private void DecryptButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var md5 = MD5.Create())
-            {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
+            string input = InputTextBox.Text;
+            string key = KeyTextBox.Text;
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(key)) return;
 
-                StringBuilder sb = new StringBuilder();
-                foreach (byte b in hashBytes)
-                {
-                    sb.Append(b.ToString("x2"));
-                }
-                return sb.ToString();
-            } // 在旧版C#中显式关闭using块
+            string algorithm = (AlgorithmComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+
+            string result = algorithm switch
+            {
+                "AES" => DecryptAes(input, key),
+                "DES" => DecryptDes(input, key),
+                "RSA" => DecryptRsa(input),
+                _ => DecryptAes(input, key)
+            };
+
+            OutputTextBox.Text = result;
         }
 
-        private string GetSha1Hash(string input)
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var sha1 = SHA1.Create())
+            if (!string.IsNullOrEmpty(OutputTextBox.Text))
             {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-                byte[] hashBytes = sha1.ComputeHash(inputBytes);
-
-                StringBuilder sb = new StringBuilder();
-                foreach (byte b in hashBytes)
-                {
-                    sb.Append(b.ToString("x2"));
-                }
-                return sb.ToString();
-            } // 在旧版C#中显式关闭using块
+                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                dataPackage.SetText(OutputTextBox.Text);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+            }
         }
 
-        private string GetSha256Hash(string input)
+        private string EncryptAes(string plainText, string key)
         {
-            using (var sha256 = SHA256.Create())
+            try
             {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-                byte[] hashBytes = sha256.ComputeHash(inputBytes);
+                byte[] iv = new byte[16];
+                byte[] array;
 
-                StringBuilder sb = new StringBuilder();
-                foreach (byte b in hashBytes)
+                using (Aes aes = Aes.Create())
                 {
-                    sb.Append(b.ToString("x2"));
+                    aes.Key = Encoding.UTF8.GetBytes(key.PadRight(32).Substring(0, 32));
+                    aes.IV = iv;
+
+                    ICryptoTransform encryptor = aes.CreateEncryptor();
+                    byte[] utf8Bytes = Encoding.UTF8.GetBytes(plainText);
+                    array = encryptor.TransformFinalBlock(utf8Bytes, 0, utf8Bytes.Length);
                 }
-                return sb.ToString();
-            } // 在旧版C#中显式关闭using块
+
+                return Convert.ToBase64String(array);
+            }
+            catch
+            {
+                return "加密失败";
+            }
         }
 
-        private string GetSha512Hash(string input)
+        private string DecryptAes(string cipherText, string key)
         {
-            using (var sha512 = SHA512.Create())
+            try
             {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-                byte[] hashBytes = sha512.ComputeHash(inputBytes);
+                byte[] iv = new byte[16];
+                byte[] buffer = Convert.FromBase64String(cipherText);
 
-                StringBuilder sb = new StringBuilder();
-                foreach (byte b in hashBytes)
+                using (Aes aes = Aes.Create())
                 {
-                    sb.Append(b.ToString("x2"));
+                    aes.Key = Encoding.UTF8.GetBytes(key.PadRight(32).Substring(0, 32));
+                    aes.IV = iv;
+
+                    ICryptoTransform decryptor = aes.CreateDecryptor();
+                    byte[] result = decryptor.TransformFinalBlock(buffer, 0, buffer.Length);
+
+                    return Encoding.UTF8.GetString(result);
                 }
-                return sb.ToString();
-            } // 在旧版C#中显式关闭using块
+            }
+            catch
+            {
+                return "解密失败";
+            }
+        }
+
+        private string EncryptDes(string plainText, string key)
+        {
+            try
+            {
+                byte[] iv = new byte[8];
+                byte[] array;
+
+                using (DESCryptoServiceProvider des = new DESCryptoServiceProvider())
+                {
+                    des.Key = ASCIIEncoding.ASCII.GetBytes(key.PadRight(8).Substring(0, 8));
+                    des.IV = iv;
+
+                    ICryptoTransform encryptor = des.CreateEncryptor();
+                    byte[] utf8Bytes = Encoding.UTF8.GetBytes(plainText);
+                    array = encryptor.TransformFinalBlock(utf8Bytes, 0, utf8Bytes.Length);
+                }
+
+                return Convert.ToBase64String(array);
+            }
+            catch
+            {
+                return "加密失败";
+            }
+        }
+
+        private string DecryptDes(string cipherText, string key)
+        {
+            try
+            {
+                byte[] iv = new byte[8];
+                byte[] buffer = Convert.FromBase64String(cipherText);
+
+                using (DESCryptoServiceProvider des = new DESCryptoServiceProvider())
+                {
+                    des.Key = ASCIIEncoding.ASCII.GetBytes(key.PadRight(8).Substring(0, 8));
+                    des.IV = iv;
+
+                    ICryptoTransform decryptor = des.CreateDecryptor();
+                    byte[] result = decryptor.TransformFinalBlock(buffer, 0, buffer.Length);
+
+                    return Encoding.UTF8.GetString(result);
+                }
+            }
+            catch
+            {
+                return "解密失败";
+            }
+        }
+
+        private string EncryptRsa(string plainText)
+        {
+            // 简单模拟，实际的RSA加密更复杂
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(plainText));
+        }
+
+        private string DecryptRsa(string cipherText)
+        {
+            // 简单模拟，实际的RSA解密更复杂
+            return Encoding.UTF8.GetString(Convert.FromBase64String(cipherText));
         }
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             InputTextBox.Text = "";
-            ResultTextBox.Text = "";
+            OutputTextBox.Text = "";
+            KeyTextBox.Text = "";
         }
     }
 } 

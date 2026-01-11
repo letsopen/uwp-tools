@@ -26,12 +26,22 @@ namespace UwpTools.Views
             this.InitializeComponent();
         }
 
-        private void ComputeHash_Click(object sender, RoutedEventArgs e)
+        private void HashTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CalculateHash();
+        }
+
+        private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CalculateHash();
+        }
+
+        private void CalculateHash()
         {
             string input = InputTextBox.Text;
             if (string.IsNullOrEmpty(input)) return;
 
-            string algorithm = AlgorithmComboBox.SelectedItem?.ToString();
+            string algorithm = (HashTypeComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
 
             string result = ComputeHash(input, algorithm ?? "MD5");
 
@@ -95,6 +105,16 @@ namespace UwpTools.Views
         {
             InputTextBox.Text = "";
             ResultTextBox.Text = "";
+        }
+
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(ResultTextBox.Text))
+            {
+                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                dataPackage.SetText(ResultTextBox.Text);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+            }
         }
     }
 } 

@@ -6,61 +6,47 @@
     xmlns:local="using:UwpTools.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="using:UwpTools.Models"
     mc:Ignorable="d">
 
     <Grid Padding="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="开发辅助工具" 
+        <TextBlock Text="UWP 开发工具集" 
                    Style="{ThemeResource TitleLargeTextBlockStyle}"
                    Margin="0,0,0,20"/>
 
-        <StackPanel Grid.Row="1" Spacing="15" Margin="0,0,0,20">
-            <TextBox x:Name="InputTextBox"
-                     Header="输入文本"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     Height="150"/>
-            
-            <ComboBox x:Name="ToolTypeComboBox"
-                      Header="工具类型"
-                      PlaceholderText="选择工具类型">
-                <ComboBoxItem Content="Base64编码" Tag="Base64Encode"/>
-                <ComboBoxItem Content="Base64解码" Tag="Base64Decode"/>
-                <ComboBoxItem Content="URL编码" Tag="UrlEncode"/>
-                <ComboBoxItem Content="URL解码" Tag="UrlDecode"/>
-                <ComboBoxItem Content="HTML编码" Tag="HtmlEncode"/>
-                <ComboBoxItem Content="HTML解码" Tag="HtmlDecode"/>
-                <ComboBoxItem Content="MD5哈希" Tag="Md5Hash"/>
-                <ComboBoxItem Content="SHA1哈希" Tag="Sha1Hash"/>
-                <ComboBoxItem Content="SHA256哈希" Tag="Sha256Hash"/>
-            </ComboBox>
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Spacing="15">
-            <TextBox x:Name="OutputTextBox"
-                     Header="输出结果"
-                     IsReadOnly="True"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     Height="150"/>
-            
-            <StackPanel Orientation="Horizontal" 
-                        Spacing="10">
-                <Button x:Name="ProcessButton"
-                        Content="处理"
-                        Click="ProcessButton_Click"/>
-                <Button x:Name="CopyButton"
-                        Content="复制结果"
-                        Click="CopyButton_Click"/>
-                <Button x:Name="ClearButton"
-                        Content="清除"
-                        Click="ClearButton_Click"/>
-            </StackPanel>
-        </StackPanel>
+        <ListView x:Name="ToolsList"
+                  Grid.Row="1"
+                  ItemsSource="{x:Null}"
+                  ItemClick="ToolsList_ItemClick"
+                  IsItemClickEnabled="True"
+                  SelectionMode="None">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="model:ToolItem">
+                    <Grid Margin="10" Padding="15" Background="{ThemeResource SystemControlBackgroundAltHighBrush}" CornerRadius="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{x:Bind Title}" 
+                                   Style="{ThemeResource BodyStrongTextBlockStyle}" 
+                                   Grid.Row="0"/>
+                        <TextBlock Text="{x:Bind Description}" 
+                                   Style="{ThemeResource CaptionTextBlockStyle}" 
+                                   Grid.Row="1" 
+                                   Margin="0,5,0,0"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
     </Grid>
-</Page> 
+</Page>

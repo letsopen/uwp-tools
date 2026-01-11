@@ -26,48 +26,76 @@ namespace UwpTools.Views
             this.InitializeComponent();
         }
 
-        private void FormatJson_Click(object sender, RoutedEventArgs e)
+        private void FormatButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string input = JsonInputTextBox.Text;
+                string input = InputTextBox.Text;
                 if (string.IsNullOrWhiteSpace(input))
                 {
-                    ResultTextBox.Text = "输入不能为空";
+                    OutputTextBox.Text = "输入不能为空";
                     return;
                 }
 
                 JToken parsedJson = JToken.Parse(input);
                 string formatted = parsedJson.ToString(Formatting.Indented);
-                ResultTextBox.Text = formatted;
+                OutputTextBox.Text = formatted;
             }
             catch (Exception ex)
             {
-                ResultTextBox.Text = $"解析错误: {ex.Message}";
+                OutputTextBox.Text = $"解析错误: {ex.Message}";
             }
         }
 
-        private void ValidateJson_Click(object sender, RoutedEventArgs e)
+        private void ValidateButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string input = JsonInputTextBox.Text;
+                string input = InputTextBox.Text;
                 JToken.Parse(input);
-                ValidationResultTextBlock.Text = "✓ 有效的JSON";
-                ValidationResultTextBlock.Foreground = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Green);
+                OutputTextBox.Text = "✓ 有效的JSON";
             }
             catch (Exception ex)
             {
-                ValidationResultTextBlock.Text = $"✗ 无效的JSON: {ex.Message}";
-                ValidationResultTextBlock.Foreground = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Red);
+                OutputTextBox.Text = $"✗ 无效的JSON: {ex.Message}";
             }
         }
 
-        private void Clear_Click(object sender, RoutedEventArgs e)
+        private void CompressButton_Click(object sender, RoutedEventArgs e)
         {
-            JsonInputTextBox.Text = "";
-            ResultTextBox.Text = "";
-            ValidationResultTextBlock.Text = "";
+            try
+            {
+                string input = InputTextBox.Text;
+                JToken parsedJson = JToken.Parse(input);
+                string compressed = parsedJson.ToString(Formatting.None);
+                OutputTextBox.Text = compressed;
+            }
+            catch (Exception ex)
+            {
+                OutputTextBox.Text = $"压缩错误: {ex.Message}";
+            }
+        }
+
+        private void CompressEscapeButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string input = InputTextBox.Text;
+                JToken parsedJson = JToken.Parse(input);
+                string compressed = parsedJson.ToString(Formatting.None);
+                string escaped = System.Uri.EscapeDataString(compressed);
+                OutputTextBox.Text = escaped;
+            }
+            catch (Exception ex)
+            {
+                OutputTextBox.Text = $"转义错误: {ex.Message}";
+            }
+        }
+
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            InputTextBox.Text = "";
+            OutputTextBox.Text = "";
         }
     }
 } 

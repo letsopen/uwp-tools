@@ -10,6 +10,6 @@ namespace UwpTools.Models
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public Type TargetPage { get; set; }
+        public Type PageType { get; set; }
     }
 }

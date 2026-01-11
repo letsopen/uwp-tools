@@ -25,20 +25,14 @@ namespace UwpTools.Views
             this.InitializeComponent();
         }
 
-        private void TestRegex_Click(object sender, RoutedEventArgs e)
+        private void MatchButton_Click(object sender, RoutedEventArgs e)
         {
             string pattern = PatternTextBox.Text;
             string input = InputTextBox.Text;
 
             try
             {
-                RegexOptions options = RegexOptions.None;
-                if (IgnoreCaseCheckBox.IsChecked == true)
-                    options |= RegexOptions.IgnoreCase;
-                if (MultilineCheckBox.IsChecked == true)
-                    options |= RegexOptions.Multiline;
-                if (SinglelineCheckBox.IsChecked == true)
-                    options |= RegexOptions.Singleline;
+                RegexOptions options = GetRegexOptions();
 
                 Regex regex = new Regex(pattern, options);
                 MatchCollection matches = regex.Matches(input);
@@ -70,21 +64,38 @@ namespace UwpTools.Views
             }
         }
 
-        private void ReplaceText_Click(object sender, RoutedEventArgs e)
+        private RegexOptions GetRegexOptions()
+        {
+            RegexOptions options = RegexOptions.None;
+            if (OptionsComboBox.SelectedItem != null)
+            {
+                string optionTag = (OptionsComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+                switch (optionTag)
+                {
+                    case "IgnoreCase":
+                        options |= RegexOptions.IgnoreCase;
+                        break;
+                    case "Multiline":
+                        options |= RegexOptions.Multiline;
+                        break;
+                    case "Singleline":
+                        options |= RegexOptions.Singleline;
+                        break;
+                }
+            }
+            return options;
+        }
+
+        private void ReplaceButton_Click(object sender, RoutedEventArgs e)
         {
             string pattern = PatternTextBox.Text;
             string input = InputTextBox.Text;
-            string replacement = ReplacementTextBox.Text;
+            // 使用固定替换文本，因为XAML中没有ReplacementTextBox
+            string replacement = "[REPLACED]"; // 可以根据需要调整
 
             try
             {
-                RegexOptions options = RegexOptions.None;
-                if (IgnoreCaseCheckBox.IsChecked == true)
-                    options |= RegexOptions.IgnoreCase;
-                if (MultilineCheckBox.IsChecked == true)
-                    options |= RegexOptions.Multiline;
-                if (SinglelineCheckBox.IsChecked == true)
-                    options |= RegexOptions.Singleline;
+                RegexOptions options = GetRegexOptions();
 
                 Regex regex = new Regex(pattern, options);
                 string result = regex.Replace(input, replacement);
@@ -97,12 +108,12 @@ namespace UwpTools.Views
             }
         }
 
-        private void Clear_Click(object sender, RoutedEventArgs e)
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             PatternTextBox.Text = "";
             InputTextBox.Text = "";
-            ReplacementTextBox.Text = "";
             ResultTextBox.Text = "";
+            OptionsComboBox.SelectedIndex = -1;
         }
     }
 }

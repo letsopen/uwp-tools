@@ -26,12 +26,12 @@ namespace UwpTools.Views
             this.InitializeComponent();
         }
 
-        private void DecodeJwt_Click(object sender, RoutedEventArgs e)
+        private void ValidateButton_Click(object sender, RoutedEventArgs e)
         {
-            string jwt = JwtTextBox.Text;
+            string jwt = InputTextBox.Text;
             if (string.IsNullOrEmpty(jwt))
             {
-                ResultTextBox.Text = "请输入JWT令牌";
+                OutputTextBox.Text = "请输入JWT令牌";
                 return;
             }
 
@@ -40,7 +40,7 @@ namespace UwpTools.Views
                 string[] parts = jwt.Split('.');
                 if (parts.Length < 2)
                 {
-                    ResultTextBox.Text = "无效的JWT格式";
+                    OutputTextBox.Text = "无效的JWT格式";
                     return;
                 }
 
@@ -52,11 +52,11 @@ namespace UwpTools.Views
 
                 string result = $"Header:\n{JsonConvert.SerializeObject(headerObj, Formatting.Indented)}\n\nPayload:\n{JsonConvert.SerializeObject(payloadObj, Formatting.Indented)}";
                 
-                ResultTextBox.Text = result;
+                OutputTextBox.Text = result;
             }
             catch (Exception ex)
             {
-                ResultTextBox.Text = $"解码错误: {ex.Message}";
+                OutputTextBox.Text = $"解码错误: {ex.Message}";
             }
         }
 
@@ -78,10 +78,20 @@ namespace UwpTools.Views
             return Encoding.UTF8.GetString(data);
         }
 
-        private void Clear_Click(object sender, RoutedEventArgs e)
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
         {
-            JwtTextBox.Text = "";
-            ResultTextBox.Text = "";
+            if (!string.IsNullOrEmpty(OutputTextBox.Text))
+            {
+                DataPackage dataPackage = new DataPackage();
+                dataPackage.SetText(OutputTextBox.Text);
+                Clipboard.SetContent(dataPackage);
+            }
+        }
+
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            InputTextBox.Text = "";
+            OutputTextBox.Text = "";
         }
     }
 }
