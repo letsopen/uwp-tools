@@ -1,7 +1,7 @@
 using System;
 using System.Text;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 
 namespace UwpTools.Views
 {

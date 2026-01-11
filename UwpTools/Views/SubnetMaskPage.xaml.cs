@@ -2,8 +2,8 @@ using System;
 using System.Net;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 
 namespace UwpTools.Views
 {

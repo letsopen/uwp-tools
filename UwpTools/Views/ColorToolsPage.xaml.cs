@@ -1,8 +1,8 @@
 using System;
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
+using Windows.UI;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.UI;
 using System.Text.RegularExpressions;
@@ -120,7 +120,7 @@ namespace UwpTools.Views
 
         private void UpdateColorPreview(int r, int g, int b)
         {
-            ColorPreviewBorder.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+            ColorPreviewBorder.Background = new Windows.UI.Xaml.Media.SolidColorBrush(
                 Color.FromArgb(255, (byte)r, (byte)g, (byte)b)
             );
         }
@@ -211,16 +211,16 @@ namespace UwpTools.Views
         {
             if (!string.IsNullOrEmpty(HexResultTextBox.Text))
             {
-                var dataPackage = new DataPackage();
+                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
                 dataPackage.SetText(HexResultTextBox.Text);
-                Clipboard.SetContent(dataPackage);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
 
                 var dialog = new ContentDialog
                 {
                     Title = "提示",
                     Content = "已复制到剪贴板",
                     CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
+
                 };
                 await dialog.ShowAsync();
             }
@@ -231,16 +231,16 @@ namespace UwpTools.Views
             if (!string.IsNullOrEmpty(RgbResultTextBox.Text))
             {
                 var text = $"RGB({RgbResultTextBox.Text})";
-                var dataPackage = new DataPackage();
+                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
                 dataPackage.SetText(text);
-                Clipboard.SetContent(dataPackage);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
 
                 var dialog = new ContentDialog
                 {
                     Title = "提示",
                     Content = "已复制到剪贴板",
                     CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
+
                 };
                 await dialog.ShowAsync();
             }
@@ -251,16 +251,16 @@ namespace UwpTools.Views
             if (!string.IsNullOrEmpty(HslResultTextBox.Text))
             {
                 var text = $"HSL({HslResultTextBox.Text})";
-                var dataPackage = new DataPackage();
+                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
                 dataPackage.SetText(text);
-                Clipboard.SetContent(dataPackage);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
 
                 var dialog = new ContentDialog
                 {
                     Title = "提示",
                     Content = "已复制到剪贴板",
                     CloseButtonText = "确定",
-                    XamlRoot = this.XamlRoot
+
                 };
                 await dialog.ShowAsync();
             }
