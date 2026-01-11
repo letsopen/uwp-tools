@@ -1,0 +1,19 @@
+<!--
+    此文件包含 .NET Native 运行时指令。运行时指令用于控制
+    .NET Native 优化器如何处理代码。使用这些指令可保留
+    代码中的元数据，重定向 API 调用，或通知运行时必须
+    内联特定的方法。
+    
+    有关编写运行时指令的详细信息，请参阅
+    https://go.microsoft.com/fwlink/?LinkID=391919
+-->
+<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
+  <Application>
+    <!--
+      Name="*Application*" 的程序集元素将应用到应用程序包中的
+      所有应用程序。名称中的星号不是通配符。
+    -->
+    <Assembly Name="*Application*" Dynamic="Required All" />
+    <!-- 在此处添加应用程序特定的运行时指令。 -->
+  </Application>
+</Directives>

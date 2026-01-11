@@ -9,7 +9,9 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <!-- 主窗口内容 -->
-        <Frame x:Name="MainFrame" />
+        <TextBlock Text="UWP Tools Main Window" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   FontSize="24" />
     </Grid>
 </Page>
