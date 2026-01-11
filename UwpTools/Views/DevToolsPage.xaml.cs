@@ -1,9 +1,20 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Text;
-using System.Security.Cryptography;
-using System.Web;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
+using UwpTools.Models;
+
+//https://go.microsoft.com/fwlink/?LinkId=234236 上介绍了"用户控件"项模板
 
 namespace UwpTools.Views
 {
@@ -12,91 +23,35 @@ namespace UwpTools.Views
         public DevToolsPage()
         {
             this.InitializeComponent();
+            LoadTools();
         }
 
-        private void ProcessButton_Click(object sender, RoutedEventArgs e)
+        private void LoadTools()
         {
-            if (string.IsNullOrEmpty(InputTextBox.Text))
+            var tools = new List<ToolItem>
             {
-                ShowError("请输入要处理的文本");
-                return;
-            }
-
-            if (ToolTypeComboBox.SelectedItem == null)
-            {
-                ShowError("请选择工具类型");
-                return;
-            }
-
-            try
-            {
-                var toolType = (ToolTypeComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Base64Encode";
-                string result = ProcessText(InputTextBox.Text, toolType);
-                OutputTextBox.Text = result;
-            }
-            catch (Exception ex)
-            {
-                ShowError($"处理失败: {ex.Message}");
-            }
-        }
-
-        private string ProcessText(string input, string toolType)
-        {
-            return toolType switch
-            {
-                "Base64Encode" => Convert.ToBase64String(Encoding.UTF8.GetBytes(input)),
-                "Base64Decode" => Encoding.UTF8.GetString(Convert.FromBase64String(input)),
-                "UrlEncode" => HttpUtility.UrlEncode(input),
-                "UrlDecode" => HttpUtility.UrlDecode(input),
-                "HtmlEncode" => HttpUtility.HtmlEncode(input),
-                "HtmlDecode" => HttpUtility.HtmlDecode(input),
-                "Md5Hash" => BitConverter.ToString(MD5.HashData(Encoding.UTF8.GetBytes(input))).Replace("-", "").ToLower(),
-                "Sha1Hash" => BitConverter.ToString(SHA1.HashData(Encoding.UTF8.GetBytes(input))).Replace("-", "").ToLower(),
-                "Sha256Hash" => BitConverter.ToString(SHA256.HashData(Encoding.UTF8.GetBytes(input))).Replace("-", "").ToLower(),
-                _ => throw new ArgumentException("不支持的工具类型")
+                new ToolItem { Title = "JSON 格式化", Description = "格式化 JSON 字符串", TargetPage = typeof(JsonToolsPage) },
+                new ToolItem { Title = "时间戳转换", Description = "时间戳与日期转换", TargetPage = typeof(TimestampPage) },
+                new ToolItem { Title = "加密工具", Description = "MD5、SHA等加密算法", TargetPage = typeof(EncryptionToolsPage) },
+                new ToolItem { Title = "哈希工具", Description = "各种哈希算法", TargetPage = typeof(HashToolsPage) },
+                new ToolItem { Title = "JWT 解析", Description = "JWT Token 解析", TargetPage = typeof(JwtToolsPage) },
+                new ToolItem { Title = "正则表达式测试", Description = "正则表达式测试", TargetPage = typeof(RegexToolsPage) },
+                new ToolItem { Title = "子网计算器", Description = "IP 子网计算", TargetPage = typeof(SubnetCalculatorPage) },
+                new ToolItem { Title = "子网掩码计算", Description = "子网掩码计算", TargetPage = typeof(SubnetMaskPage) },
+                new ToolItem { Title = "中文数字转换", Description = "阿拉伯数字转中文", TargetPage = typeof(ChineseNumberPage) },
+                new ToolItem { Title = "Base64 图片编码", Description = "图片转 Base64", TargetPage = typeof(Base64ImagePage) },
+                new ToolItem { Title = "颜色工具", Description = "颜色转换工具", TargetPage = typeof(ColorToolsPage) }
             };
+
+            ToolsList.ItemsSource = tools;
         }
 
-        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        private void ToolsList_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (!string.IsNullOrEmpty(OutputTextBox.Text))
+            if (e.ClickedItem is ToolItem toolItem)
             {
-                var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
-                dataPackage.SetText(OutputTextBox.Text);
-                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
-                ShowMessage("已复制到剪贴板");
+                Frame.Navigate(toolItem.TargetPage);
             }
-        }
-
-        private void ClearButton_Click(object sender, RoutedEventArgs e)
-        {
-            InputTextBox.Text = string.Empty;
-            OutputTextBox.Text = string.Empty;
-            ToolTypeComboBox.SelectedItem = null;
-        }
-
-        private void ShowError(string message)
-        {
-            var dialog = new ContentDialog
-            {
-                Title = "错误",
-                Content = message,
-                CloseButtonText = "确定",
-                XamlRoot = this.XamlRoot
-            };
-            _ = dialog.ShowAsync();
-        }
-
-        private void ShowMessage(string message)
-        {
-            var dialog = new ContentDialog
-            {
-                Title = "提示",
-                Content = message,
-                CloseButtonText = "确定",
-                XamlRoot = this.XamlRoot
-            };
-            _ = dialog.ShowAsync();
         }
     }
 } 
