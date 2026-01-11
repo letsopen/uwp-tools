@@ -1,52 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Window
+<Page
     x:Class="UwpTools.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:UwpTools"
-    xmlns:models="using:UwpTools.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="UwpTools">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <CommandBar x:Name="TopCommandBar" 
-                    DefaultLabelPosition="Collapsed"
-                    IsOpen="False"
-                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-            <AppBarButton x:Name="BackButton" 
-                         Icon="Back" 
-                         Label="返回"
-                         Click="BackButton_Click"
-                         Visibility="Collapsed"/>
-        </CommandBar>
-
-        <Frame x:Name="ContentFrame" Grid.Row="1">
-            <ListView x:Name="ToolsListView" 
-                      SelectionMode="Single"
-                      SelectionChanged="ToolsListView_SelectionChanged">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:ToolItem">
-                        <Grid Margin="0,5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="{x:Bind Icon}" Margin="0,0,10,0"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="{x:Bind Title}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                                <TextBlock Text="{x:Bind Description}" Style="{StaticResource CaptionTextBlockStyle}"/>
-                            </StackPanel>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Frame>
+        <!-- 主窗口内容 -->
+        <Frame x:Name="MainFrame" />
     </Grid>
-</Window>
+</Page>

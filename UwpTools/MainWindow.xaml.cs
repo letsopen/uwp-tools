@@ -13,15 +13,14 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+// https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了"空白页"项模板
 
 namespace UwpTools
 {
     /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
+    /// 可用于自身或导航至 Frame 内部的空白页。
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainWindow : Page
     {
         public MainWindow()
         {
