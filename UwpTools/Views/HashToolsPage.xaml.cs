@@ -101,7 +101,7 @@ namespace UwpTools.Views
             return sb.ToString();
         }
 
-        private void Clear_Click(object sender, RoutedEventArgs e)
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             InputTextBox.Text = "";
             ResultTextBox.Text = "";
