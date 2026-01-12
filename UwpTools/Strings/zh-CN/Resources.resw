@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AppName" xml:space="preserve">
+    <value>UwpTools</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>我的应用程序</value>
+  </data>
+</root>
