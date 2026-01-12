@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Text;
+using Windows.ApplicationModel.DataTransfer;
 
 //https://go.microsoft.com/fwlink/?LinkId=234236 上介绍了"用户控件"项模板
 
@@ -84,7 +85,7 @@ namespace UwpTools.Views
             {
                 DataPackage dataPackage = new DataPackage();
                 dataPackage.SetText(OutputTextBox.Text);
-                Clipboard.SetContent(dataPackage);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
             }
         }
 
